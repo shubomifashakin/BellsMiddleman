@@ -7,7 +7,7 @@ export default {
       colors: {
         primaryBgColor: "#F1F7ED",
         bellsBlue: "#3c9ac9",
-        hoverBellsBlue: "#3c9aa1",
+        hoverBellsBlue: "#91C7B1",
       },
     },
   },
