@@ -30,3 +30,14 @@ export async function FindCourse(course, abortSignal) {
 
   return Courses;
 }
+
+export async function GetColleges() {
+  let { data: Colleges, error } = await supabase
+    .from("Colleges")
+    .select("*")
+    .order("college", { ascending: true });
+
+  if (error) throw error;
+
+  return Colleges;
+}

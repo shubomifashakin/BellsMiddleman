@@ -4,6 +4,22 @@ export default {
   theme: {
     fontFamily: { sans: ['"Poppins", sans-serif'] },
     extend: {
+      animation: {
+        flash: "flash .5s ease-in-out",
+        flasInfinite: "flash2 1.25s ease-in-out infinite",
+      },
+
+      keyframes: {
+        flash: {
+          from: { opacity: 0 },
+          to: { opacity: 1 },
+        },
+        flash2: {
+          "0%": { opacity: 0.6 },
+          "50%": { opacity: 0.4 },
+          "100%": { opacity: 0.6 },
+        },
+      },
       colors: {
         primaryBgColor: "#F1F7ED",
         bellsBlue: "#3c9ac9",

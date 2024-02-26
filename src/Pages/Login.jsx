@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useReducer, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useForm } from "react-hook-form";
@@ -8,7 +8,13 @@ import toast from "react-hot-toast";
 import { IoIosAddCircle, IoIosCloseCircle } from "react-icons/io";
 
 import { CheckBox } from "../Components/CheckBox";
-import { FindCourse, LogInUser, SignUpUser } from "../Actions/SupabaseActions";
+import {
+  FindCourse,
+  GetColleges,
+  LogInUser,
+  SignUpUser,
+} from "../Actions/SupabaseActions";
+import { sortArrayBasedOnLetters } from "../Actions/HelperActions";
 
 function Login() {
   const [checked, setChecked] = useState(false);
@@ -45,7 +51,7 @@ function Login() {
           <CheckBox checked={checked} setChecked={setChecked} />
         </span>
 
-        {checked ? <SignUpForm /> : <LoginInForm />}
+        {checked ? <SignUpForm setChecked={setChecked} /> : <LoginInForm />}
 
         <BottomLinks checked={checked} />
       </div>
@@ -63,7 +69,7 @@ function LoginInForm() {
     const { password, email } = userData;
 
     try {
-      const createUser = await LogInUser(email, password);
+      const logInUser = await LogInUser(email, password);
       navigate("/home");
     } catch (err) {
       toast.error(err.message);
@@ -71,7 +77,7 @@ function LoginInForm() {
   }
 
   return (
-    <div className="space-y-2">
+    <div className="animate-flash space-y-2">
       <h2 className="text-2xl font-semibold">Log In</h2>
       <form className="block space-y-6" onSubmit={handleSubmit(handleLogin)}>
         <InputGroup label={"Email"}>
@@ -118,26 +124,54 @@ function LoginInForm() {
   );
 }
 
-function SignUpForm() {
+const initialSignUpState = {
+  selectedCourses: [],
+  matricNo: "",
+  college: "",
+  dept: "",
+  email: "",
+  password: "",
+  valPassword: "",
+};
+
+function SignUpReducer(state, { payload, label }) {
+  switch (label) {
+    case "setEmail":
+      return { ...state, email: payload };
+
+    case "setPassword":
+      return { ...state, password: payload };
+
+    case "setValPassword":
+      return { ...state, valPassword: payload };
+
+    case "setCollege":
+      return { ...state, college: payload };
+
+    case "setMatricNo":
+      return { ...state, matricNo: payload };
+
+    case "setDept":
+      return { ...state, dept: payload };
+
+    case "addCourse":
+      return { ...state, selectedCourses: [...state.selectedCourses, payload] };
+
+    case "removeCourse":
+      return {
+        ...state,
+        selectedCourses: state.selectedCourses.filter((c) => c !== payload),
+      };
+  }
+}
+
+function SignUpForm({ setChecked }) {
   const [step, setStep] = useState(1);
 
-  const [step1Data, setStep1Data] = useState(null);
-  const [step2Data, setStep2Data] = useState(null);
-
-  const [selectedCourses, setSelectedCourses] = useState([]);
-
-  //form state for step1
-  const { formState, handleSubmit, register, getValues } = useForm();
-
-  //form state for step2
-  const {
-    formState: formState2,
-    handleSubmit: handleSubmit2,
-    register: register2,
-  } = useForm();
-
-  const { errors } = formState;
-  const { errors: errors2 } = formState2;
+  const [
+    { selectedCourses, matricNo, college, dept, email, password, valPassword },
+    dispatch,
+  ] = useReducer(SignUpReducer, initialSignUpState);
 
   function decrStep() {
     if (step === 1) return;
@@ -149,20 +183,20 @@ function SignUpForm() {
     setStep((c) => c + 1);
   }
 
-  function handleStep1(userData) {
-    //store the users step1 data
-    setStep1Data(userData);
+  //handles the signing up
+  async function handleSignUp() {
+    //if no course was selected, prevent user from submitting
+    if (!selectedCourses.length) return;
 
-    //go to the next step
-    incrStep();
-  }
+    try {
+      const createUser = await SignUpUser(email, password);
+      toast.success(`An email has been sent to ${email}`);
 
-  function handleStep2(userData) {
-    //store the users step2 data
-    setStep2Data(userData);
-
-    //go to the next step
-    incrStep();
+      //show log in ui
+      setChecked(false);
+    } catch (error) {
+      toast.error(error.message);
+    }
   }
 
   return (
@@ -185,52 +219,111 @@ function SignUpForm() {
 
       {step === 1 ? (
         <Step1Form
-          handleStep1={handleStep1}
-          getValues={getValues}
-          handleSubmit={handleSubmit}
-          register={register}
-          errors={errors}
+          incrStep={incrStep}
+          email={email}
+          password={password}
+          valPassword={valPassword}
+          dispatch={dispatch}
         />
       ) : null}
 
       {step === 2 ? (
         <Step2Form
-          handleStep2={handleStep2}
-          handleSubmit2={handleSubmit2}
-          register2={register2}
-          errors2={errors2}
           decrStep={decrStep}
+          incrStep={incrStep}
+          dispatch={dispatch}
+          matricNo={matricNo}
+          college={college}
+          dept={dept}
         />
       ) : null}
 
       {step === 3 ? (
         <Step3Form
           selectedCourses={selectedCourses}
-          setSelectedCourses={setSelectedCourses}
+          handleSignUp={handleSignUp}
+          dispatch={dispatch}
+          decrStep={decrStep}
         />
-      ) : null}
-
-      {/**show the next and previous buttons after going to step 2 */}
-      {step >= 3 ? (
-        <div className="flex justify-between">
-          <Button action={decrStep} label={"Previous"} />
-
-          <Button label={"Sign Up"} />
-        </div>
       ) : null}
     </div>
   );
 }
 
-function Step1Form({ handleSubmit, handleStep1, register, errors, getValues }) {
+function Step1Form({ incrStep, email, password, valPassword, dispatch }) {
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [valError, setValError] = useState("");
+
+  function handleEmail(value) {
+    dispatch({ label: "setEmail", payload: value });
+
+    setEmailError("");
+  }
+
+  function handlePassword(value) {
+    dispatch({ label: "setPassword", payload: value });
+
+    setPasswordError("");
+  }
+
+  function handleValPassword(value) {
+    dispatch({ label: "setValPassword", payload: value });
+
+    setValError("");
+  }
+
+  function handleSubmit(e) {
+    e.preventDefault();
+
+    if (!email && !password && !valPassword) {
+      setPasswordError("Please enter your password");
+      setEmailError("Please enter your email");
+      setValError("Please enter your password");
+      return;
+    }
+
+    if (!email) {
+      setEmailError("Please enter your email");
+      return;
+    }
+
+    if (!password) {
+      setPasswordError("Please enter your password");
+    }
+
+    if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+/.test(password)) {
+      setPasswordError(
+        "Must contain uppercase & lowercase letters and a number",
+      );
+      return;
+    }
+
+    if (!valPassword) {
+      setValError("Please enter your password again");
+      7;
+
+      return;
+    }
+
+    if (password !== valPassword) {
+      setValError("Passwords do not match");
+      setPasswordError("Passwords do not match");
+      return;
+    }
+
+    //go to next step
+    incrStep();
+  }
+
   return (
     <form
-      className="flex flex-col space-y-6 "
-      onSubmit={handleSubmit(handleStep1)}
+      className="flex animate-flash flex-col space-y-6 "
+      onSubmit={handleSubmit}
     >
       <InputGroup label={"Email"}>
-        {errors?.email?.message ? (
-          <p className="text-xs text-red-600">{errors?.email?.message}</p>
+        {emailError ? (
+          <p className="text-xs text-red-600">{emailError}</p>
         ) : null}
 
         <input
@@ -238,19 +331,14 @@ function Step1Form({ handleSubmit, handleStep1, register, errors, getValues }) {
           type="email"
           id="Email"
           placeholder="YourEmail@Email.com"
-          {...register("email", {
-            required: { value: true, message: "Please enter your email" },
-            pattern: {
-              value: /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-              message: "Please enter a valid email address",
-            },
-          })}
+          value={email}
+          onChange={(e) => handleEmail(e.target.value)}
         />
       </InputGroup>
 
       <InputGroup label={"Password"}>
-        {errors?.password?.message ? (
-          <p className="text-xs  text-red-600">{errors?.password?.message}</p>
+        {passwordError ? (
+          <p className="text-xs  text-red-600">{passwordError}</p>
         ) : null}
 
         <input
@@ -258,43 +346,21 @@ function Step1Form({ handleSubmit, handleStep1, register, errors, getValues }) {
           type="password"
           id="Password"
           placeholder="Your Password"
-          {...register("password", {
-            required: { value: true, message: "Please enter your password" },
-            minLength: { value: 7, message: "At least 7 characters" },
-            pattern: {
-              value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+/,
-              message:
-                "Must contain uppercase & lowercase letters and a number",
-            },
-          })}
+          value={password}
+          onChange={(e) => handlePassword(e.target.value)}
         />
       </InputGroup>
 
       <InputGroup label={"Re-type Password"}>
-        {errors?.validatePassword?.message ? (
-          <p className="text-xs  text-red-600">
-            {errors?.validatePassword?.message}
-          </p>
-        ) : null}
+        {valError ? <p className="text-xs  text-red-600">{valError}</p> : null}
 
         <input
           className="input-style"
           type="password"
           id="validate"
           placeholder="Your Password Again"
-          {...register("validatePassword", {
-            required: {
-              value: true,
-              message: "Please enter your password again",
-            },
-            validate: {
-              function(val) {
-                return val === getValues().password
-                  ? true
-                  : "Passwords do not match";
-              },
-            },
-          })}
+          value={valPassword}
+          onChange={(e) => handleValPassword(e.target.value)}
         />
       </InputGroup>
 
@@ -303,21 +369,115 @@ function Step1Form({ handleSubmit, handleStep1, register, errors, getValues }) {
   );
 }
 
-function Step2Form({
-  handleSubmit2,
-  handleStep2,
-  register2,
-  errors2,
-  decrStep,
-}) {
+function Step2Form({ decrStep, incrStep, matricNo, college, dept, dispatch }) {
+  const [allColleges, setAllColleges] = useState([]);
+  const [allDepts, setAllDepts] = useState([]);
+
+  const sortedDepts = sortArrayBasedOnLetters(allDepts);
+
+  const [errorMatric, setErrorMatric] = useState("");
+  const [errorColl, setErrorColl] = useState("");
+  const [errorDept, setErrorDept] = useState("");
+
+  function handleSubmit(e) {
+    e.preventDefault();
+
+    if (!matricNo && !college && !dept) {
+      setErrorMatric("Please enter your matric number");
+      setErrorDept("Please select your department");
+      setErrorColl("Please select your college");
+      return;
+    }
+
+    if (!matricNo) {
+      setErrorMatric("Please enter your matric number");
+      return;
+    }
+
+    if (!college) {
+      setErrorColl("Please select your college");
+
+      if (!/^[0-9]{4}\/[0-9]{4}$/.test(matricNo)) {
+        setErrorMatric("Please enter a valid matric number");
+      }
+      return;
+    }
+
+    if (!dept) {
+      setErrorDept("Please select your department");
+      7;
+
+      if (!/^[0-9]{4}\/[0-9]{4}$/.test(matricNo)) {
+        setErrorMatric("Please enter a valid matric number");
+      }
+      return;
+    }
+
+    if (!/^[0-9]{4}\/[0-9]{4}$/.test(matricNo)) {
+      setErrorMatric("Please enter a valid matric number");
+      return;
+    }
+
+    //go to the next step
+    incrStep();
+  }
+
+  function handleMatric(value) {
+    dispatch({ label: "setMatricNo", payload: value });
+
+    setErrorMatric("");
+  }
+
+  function handleCollege(value) {
+    dispatch({ label: "setCollege", payload: value });
+
+    setErrorColl("");
+  }
+
+  function handleDept(value) {
+    dispatch({ label: "setDept", payload: value });
+
+    setErrorDept("");
+  }
+
+  //get list of colleges on mount
+  useLayoutEffect(function () {
+    //get list of colleges
+    async function getColleges() {
+      try {
+        const colleges = await GetColleges();
+        setAllColleges(colleges);
+      } catch (err) {
+        console.log(err);
+      }
+    }
+
+    getColleges();
+  }, []);
+
+  //get list of departments if a college has been selected, refetch anytime the college changes
+  useEffect(
+    function () {
+      //if user has not selected a college, do not fetch yet
+      if (!college || !allColleges.length) return;
+
+      const deptsInCollege = allColleges.find((c) => {
+        return c.college === college;
+      }).departments;
+
+      setAllDepts(deptsInCollege);
+    },
+    [college, allColleges],
+  );
+
   return (
     <form
-      className="flex flex-col space-y-6 "
-      onSubmit={handleSubmit2(handleStep2)}
+      className="flex animate-flash flex-col space-y-6 "
+      onSubmit={handleSubmit}
     >
       <InputGroup label={"Matric Number"}>
-        {errors2?.matricNo?.message ? (
-          <p className="text-xs text-red-600">{errors2?.matricNo?.message}</p>
+        {errorMatric ? (
+          <p className="text-xs text-red-600">{errorMatric}</p>
         ) : null}
 
         <input
@@ -325,53 +485,59 @@ function Step2Form({
           type="text"
           id="matricNo"
           placeholder="Your Matric Number"
-          {...register2("matricNo", {
-            required: {
-              value: true,
-              message: "Please enter your matric number",
-            },
-            pattern: {
-              value: /^[0-9]{4}\/[0-9]{4}$/,
-              message: "Please enter a valid matric number",
-            },
-          })}
+          value={matricNo}
+          onChange={(e) => handleMatric(e.target.value)}
         />
       </InputGroup>
 
       <InputGroup label={"College"}>
-        {errors2?.college?.message ? (
-          <p className="text-xs  text-red-600">{errors2?.college?.message}</p>
-        ) : null}
+        {errorColl ? <p className="text-xs text-red-600">{errorColl}</p> : null}
 
-        <input
+        <select
           className="input-style"
-          type="text"
-          id="college"
-          placeholder="Your College"
-          {...register2("college", {
-            required: { value: true, message: "Please enter your college" },
+          value={college ? college : null}
+          onChange={(e) => handleCollege(e.target.value)}
+        >
+          <option className="text-center" selected disabled>
+            --- Please select your college ---
+          </option>
+
+          {allColleges.map((college, i) => {
+            return (
+              <option className="text-center" value={college.college} key={i}>
+                {college.college}
+              </option>
+            );
           })}
-        />
+        </select>
       </InputGroup>
 
-      <InputGroup label={"Department"}>
-        {errors2?.dept?.message ? (
-          <p className="text-xs  text-red-600">{errors2?.dept?.message}</p>
-        ) : null}
+      {/*show the selection input if the user has selected a college && all the departments for that college have been fetched */}
+      {allDepts.length ? (
+        <InputGroup label={"Department"}>
+          {errorDept ? (
+            <p className="text-xs text-red-600">{errorDept}</p>
+          ) : null}
 
-        <input
-          className="input-style"
-          type="text"
-          id="dept"
-          placeholder="Your Department"
-          {...register2("dept", {
-            required: {
-              value: true,
-              message: "Please enter your department",
-            },
-          })}
-        />
-      </InputGroup>
+          <select
+            className="input-style"
+            value={dept ? dept : null}
+            onChange={(e) => handleDept(e.target.value)}
+          >
+            <option className="text-center" selected disabled>
+              --- Please select a department ---
+            </option>
+
+            {sortedDepts.map((dept, i) => {
+              return (
+                <option className="text-center" key={i} value={dept}>
+                  {dept}
+                </option>
+              );
+            })}
+          </select>
+        </InputGroup>
+      ) : null}
 
       <div className="flex justify-between">
         <Button action={decrStep} label={"Previous"} />
@@ -381,43 +547,60 @@ function Step2Form({
   );
 }
 
-function Step3Form({ selectedCourses, setSelectedCourses }) {
-  const [searchCourse, setSearchCourse] = useState("");
-  const [foundCourses, setFoundCourses] = useState([]);
-  const [error, setError] = useState("");
+function Step3Form({ decrStep, selectedCourses, dispatch, handleSignUp }) {
+  const [{ searchParam, loading, error, foundCourses }, dispatch2] = useReducer(
+    step3Reducer,
+    initialStep3State,
+  );
 
-  function addCourse(course) {
+  function addCourse(e, course) {
+    e.stopPropagation();
+    e.preventDefault();
     if (selectedCourses.includes(course)) return;
-    setSelectedCourses((c) => [...c, course]);
+    dispatch({ label: "addCourse", payload: course });
   }
 
-  function removeCourse(course) {
-    setSelectedCourses((c) => c.filter((c, i) => c !== course));
+  function removeCourse(e, course) {
+    e.stopPropagation();
+    e.preventDefault();
+    dispatch({ label: "removeCourse", payload: course });
+  }
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    handleSignUp();
   }
 
   //search for course on change
   useEffect(
     function () {
       const abortController = new AbortController();
+
       async function getCourses() {
         try {
-          const data = await FindCourse(searchCourse, abortController);
-          setFoundCourses(data);
+          const data = await FindCourse(searchParam, abortController);
+
+          dispatch2({ label: "foundCourses", payload: data });
         } catch (err) {
-          if (abortController.signal.aborted) return;
-          setError(err.message);
+          if (abortController.signal.aborted) {
+            dispatch2({ label: "stopLoading" });
+            return;
+          }
+          dispatch2({ label: "error", payload: err.message });
         }
       }
 
-      getCourses();
+      if (searchParam.length) {
+        getCourses();
+      }
 
       return () => abortController.abort();
     },
-    [searchCourse],
+    [searchParam],
   );
 
   return (
-    <div className="space-y-2">
+    <form className="animate-flash space-y-2" onSubmit={handleSubmit}>
       <div className="flex items-center justify-between">
         <h2 className="text-xs">Select Courses You Are Offering</h2>
         <span className="text-xs">
@@ -429,34 +612,49 @@ function Step3Form({ selectedCourses, setSelectedCourses }) {
         type="search"
         placeholder="Search for a course"
         className="input-style w-full "
-        onChange={(e) => setSearchCourse(e.target.value)}
+        value={searchParam}
+        onChange={(e) =>
+          dispatch2({ label: "searching", payload: e.target.value })
+        }
       />
 
       <div className="max-h-52 overflow-y-auto p-2 lg:max-h-40">
-        {/**if the user is searching for a course, show the found courses */}
-        {searchCourse.length ? (
+        {/**if we have finished searching */}
+        {searchParam && !loading && !error ? (
           <>
-            {foundCourses.map((course, i) => {
-              return (
-                <div className="flex items-center justify-between py-2" key={i}>
-                  <span> {course.course_code}</span>
+            {foundCourses.length ? (
+              foundCourses.map((course, i) => {
+                return (
+                  <div
+                    className="flex items-center justify-between py-2"
+                    key={i}
+                  >
+                    <span> {course.course_code}</span>
 
-                  <div className="flex items-center">
-                    <button
-                      className="text-sm transition-colors duration-300 ease-in-out hover:text-hoverBellsBlue active:text-hoverBellsBlue"
-                      onClick={() => addCourse(course.course_code)}
-                    >
-                      <IoIosAddCircle className=" text-xl text-black hover:text-hoverBellsBlue" />
-                    </button>
+                    <div className="flex items-center">
+                      <button
+                        className="text-sm transition-colors duration-300 ease-in-out hover:text-hoverBellsBlue active:text-hoverBellsBlue"
+                        onClick={(e) => addCourse(e, course.course_code)}
+                      >
+                        <IoIosAddCircle className=" text-xl text-black hover:text-hoverBellsBlue" />
+                      </button>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })
+            ) : (
+              <p className="text-center text-sm">No course found</p>
+            )}
           </>
         ) : null}
 
+        {/** if we are still searching */}
+        {loading && searchParam ? (
+          <p className="text-center text-sm">Finding Course...</p>
+        ) : null}
+
         {/**if the user is not searching for anything show the selected courses */}
-        {!searchCourse.length ? (
+        {!searchParam ? (
           <>
             {selectedCourses.map((course, i) => {
               return (
@@ -466,7 +664,7 @@ function Step3Form({ selectedCourses, setSelectedCourses }) {
                   <div className="flex items-center px-1">
                     <button
                       className="text-sm transition-colors duration-300 ease-in-out hover:text-hoverBellsBlue active:text-hoverBellsBlue"
-                      onClick={() => removeCourse(course)}
+                      onClick={(e) => removeCourse(e, course)}
                     >
                       <IoIosCloseCircle className=" text-xl text-black hover:text-hoverBellsBlue" />
                     </button>
@@ -477,7 +675,13 @@ function Step3Form({ selectedCourses, setSelectedCourses }) {
           </>
         ) : null}
       </div>
-    </div>
+
+      <div className="flex justify-between">
+        <Button action={decrStep} label={"Previous"} />
+
+        <Button label={"Sign Up"} />
+      </div>
+    </form>
   );
 }
 
@@ -536,6 +740,28 @@ function BottomLinks({ checked }) {
     </div>
   );
 }
-export default Login;
 
-export function FormAction() {}
+function step3Reducer(state, { payload, label }) {
+  switch (label) {
+    case "searching":
+      return { ...state, searchParam: payload, loading: true };
+
+    case "stopLoading":
+      return { ...state, loading: false };
+
+    case "error":
+      return { ...state, loading: false, error: payload };
+
+    case "foundCourses":
+      return { ...state, loading: false, foundCourses: payload };
+  }
+}
+
+const initialStep3State = {
+  searchParam: "",
+  foundCourses: [],
+  error: "",
+  loading: false,
+};
+
+export default Login;
