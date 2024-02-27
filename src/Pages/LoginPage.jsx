@@ -184,6 +184,9 @@ function Step3Reducer(state, { payload, label }) {
 
     case "foundCourses":
       return { ...state, loading: false, foundCourses: payload };
+
+    case "clearSearchParam":
+      return { ...state, searchParam: "" };
   }
 }
 
@@ -240,7 +243,7 @@ function LoginInForm() {
     const { password, email } = userData;
 
     try {
-      const logInUser = await LogInUser(email, password);
+      await LogInUser(email, password);
       navigate("/home");
     } catch (err) {
       toast.error(err.message);
@@ -704,6 +707,7 @@ function Step3Form() {
     initialStep3State,
   );
 
+  const orderedSelectedCourses = sortArrayBasedOnLetters(selectedCourses);
   const searchRef = useRef(null);
 
   function addCourse(e, course) {
@@ -711,6 +715,7 @@ function Step3Form() {
     e.preventDefault();
     if (selectedCourses.includes(course)) return;
     dispatch({ label: "addCourse", payload: course });
+    dispatch2({ label: "clearSearchParam" });
   }
 
   function removeCourse(e, course) {
@@ -763,13 +768,13 @@ function Step3Form() {
     <form className="animate-flash space-y-2" onSubmit={handleSubmit}>
       <div className="flex items-center justify-between">
         <h2 className="text-xs">Select Courses You Are Offering</h2>
-        <span className="text-xs">
-          {selectedCourses.length} courses selected
+        <span className="text-xs capitalize">
+          {orderedSelectedCourses.length} courses selected
         </span>
       </div>
 
       <input
-        type="search"
+        type="text"
         ref={searchRef}
         placeholder="Search for a course"
         className="input-style w-full "
@@ -783,6 +788,7 @@ function Step3Form() {
         {/**if we have finished searching */}
         {searchParam && !loading && !error ? (
           <>
+            <h2 className="text-xs">Found Courses</h2>
             {foundCourses.length ? (
               foundCourses.map((course, i) => {
                 return (
@@ -817,7 +823,8 @@ function Step3Form() {
         {/**if the user is not searching for anything show the selected courses */}
         {!searchParam ? (
           <>
-            {selectedCourses.map((course, i) => {
+            <h2 className="text-xs">Selected Courses</h2>
+            {orderedSelectedCourses.map((course, i) => {
               return (
                 <div className="flex items-center justify-between py-2" key={i}>
                   <span> {course}</span>

@@ -2,12 +2,19 @@ import { supabase } from "../supabase";
 
 export async function SignUpUser(details) {
   const { email, password, college, dept, matricNo, courses } = details;
-  let { _, error } = await supabase.auth.signUp({
+
+  // Convert array to JSON string
+  let jsonString = JSON.stringify(courses);
+
+  // Convert JSON string to JSONB array format
+  let jsonbCourses = `['${jsonString.replace(/'/g, "''")}']`;
+
+  let { error } = await supabase.auth.signUp({
     email,
     password,
     options: {
       data: {
-        courses,
+        courses: jsonbCourses,
         college,
         matricNo,
         dept,
@@ -19,7 +26,7 @@ export async function SignUpUser(details) {
 }
 
 export async function LogInUser(email, password) {
-  let { _, error } = await supabase.auth.signInWithPassword({
+  let { error } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
