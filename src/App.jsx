@@ -10,14 +10,31 @@ import NotesPage from "./Pages/NotesPage";
 import ForgotPassswordPage from "./Pages/ForgotPassswordPage";
 
 import Layout from "./Components/Layout";
+import ProtectedRoute from "./Components/ProtectedRoute";
 
 const router = createBrowserRouter([
   { path: "/", element: <LoginPage /> },
   { path: "forgotPassword", element: <ForgotPassswordPage /> },
-  { element: <Layout />, children: [{ path: "home", element: <HomePage /> }] },
+  {
+    element: <Layout />,
+    children: [
+      {
+        path: "home",
+        element: (
+          <ProtectedRoute>
+            <HomePage />
+          </ProtectedRoute>
+        ),
+      },
+    ],
+  },
   {
     path: "/:code",
-    element: <CoursePage />,
+    element: (
+      <ProtectedRoute>
+        <CoursePage />
+      </ProtectedRoute>
+    ),
     children: [
       { path: "assignments", element: <AssignmentsPage /> },
       { path: "notes", element: <NotesPage /> },
