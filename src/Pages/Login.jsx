@@ -1,4 +1,12 @@
-import { useEffect, useLayoutEffect, useReducer, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useReducer,
+  useRef,
+  useState,
+} from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useForm } from "react-hook-form";
@@ -8,13 +16,22 @@ import toast from "react-hot-toast";
 import { IoIosAddCircle, IoIosCloseCircle } from "react-icons/io";
 
 import { CheckBox } from "../Components/CheckBox";
+
 import {
   FindCourse,
   GetColleges,
   LogInUser,
   SignUpUser,
 } from "../Actions/SupabaseActions";
-import { sortArrayBasedOnLetters } from "../Actions/HelperActions";
+
+import {
+  emailEmpty,
+  invalidPassword,
+  passwordEmpty,
+  passwordsNotMatch,
+  sortArrayBasedOnLetters,
+  valEmpty,
+} from "../Actions/HelperActions";
 
 function Login() {
   const [checked, setChecked] = useState(false);
@@ -124,46 +141,7 @@ function LoginInForm() {
   );
 }
 
-const initialSignUpState = {
-  selectedCourses: [],
-  matricNo: "",
-  college: "",
-  dept: "",
-  email: "",
-  password: "",
-  valPassword: "",
-};
-
-function SignUpReducer(state, { payload, label }) {
-  switch (label) {
-    case "setEmail":
-      return { ...state, email: payload };
-
-    case "setPassword":
-      return { ...state, password: payload };
-
-    case "setValPassword":
-      return { ...state, valPassword: payload };
-
-    case "setCollege":
-      return { ...state, college: payload };
-
-    case "setMatricNo":
-      return { ...state, matricNo: payload };
-
-    case "setDept":
-      return { ...state, dept: payload };
-
-    case "addCourse":
-      return { ...state, selectedCourses: [...state.selectedCourses, payload] };
-
-    case "removeCourse":
-      return {
-        ...state,
-        selectedCourses: state.selectedCourses.filter((c) => c !== payload),
-      };
-  }
-}
+const SignUpContext = createContext(null);
 
 function SignUpForm({ setChecked }) {
   const [step, setStep] = useState(1);
@@ -183,13 +161,19 @@ function SignUpForm({ setChecked }) {
     setStep((c) => c + 1);
   }
 
+  const signUpDetails = {
+    email,
+    password,
+    courses: selectedCourses,
+    matricNo,
+    college,
+    dept,
+  };
+
   //handles the signing up
   async function handleSignUp() {
-    //if no course was selected, prevent user from submitting
-    if (!selectedCourses.length) return;
-
     try {
-      const createUser = await SignUpUser(email, password);
+      const createUser = await SignUpUser(signUpDetails);
       toast.success(`An email has been sent to ${email}`);
 
       //show log in ui
@@ -199,116 +183,116 @@ function SignUpForm({ setChecked }) {
     }
   }
 
+  const ctxValues = {
+    incrStep,
+    email,
+    password,
+    valPassword,
+    dispatch,
+    matricNo,
+    college,
+    dept,
+    decrStep,
+    selectedCourses,
+    handleSignUp,
+  };
+
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-semibold">Sign Up</h2>
+    <SignUpContext.Provider value={ctxValues}>
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-semibold">Sign Up</h2>
 
-        <div className="flex space-x-2">
-          <span
-            className={`block h-3 w-3 rounded-full  ${step >= 1 ? " border border-stone-700 bg-hoverBellsBlue " : "bg-bellsBlue"}`}
-          ></span>
-          <span
-            className={`block h-3 w-3 rounded-full  ${step >= 2 ? " border border-stone-700 bg-hoverBellsBlue " : "bg-bellsBlue"}`}
-          ></span>
-          <span
-            className={`block h-3 w-3 rounded-full  ${step >= 3 ? " border border-stone-700 bg-hoverBellsBlue " : "bg-bellsBlue"}`}
-          ></span>
+          <div className="flex space-x-2">
+            <span
+              className={`block h-3 w-3 rounded-full  ${step >= 1 ? " border border-stone-700 bg-hoverBellsBlue " : "bg-bellsBlue"}`}
+            ></span>
+            <span
+              className={`block h-3 w-3 rounded-full  ${step >= 2 ? " border border-stone-700 bg-hoverBellsBlue " : "bg-bellsBlue"}`}
+            ></span>
+            <span
+              className={`block h-3 w-3 rounded-full  ${step >= 3 ? " border border-stone-700 bg-hoverBellsBlue " : "bg-bellsBlue"}`}
+            ></span>
+          </div>
         </div>
+
+        {step === 1 ? <Step1Form /> : null}
+
+        {step === 2 ? <Step2Form /> : null}
+
+        {step === 3 ? <Step3Form /> : null}
       </div>
-
-      {step === 1 ? (
-        <Step1Form
-          incrStep={incrStep}
-          email={email}
-          password={password}
-          valPassword={valPassword}
-          dispatch={dispatch}
-        />
-      ) : null}
-
-      {step === 2 ? (
-        <Step2Form
-          decrStep={decrStep}
-          incrStep={incrStep}
-          dispatch={dispatch}
-          matricNo={matricNo}
-          college={college}
-          dept={dept}
-        />
-      ) : null}
-
-      {step === 3 ? (
-        <Step3Form
-          selectedCourses={selectedCourses}
-          handleSignUp={handleSignUp}
-          dispatch={dispatch}
-          decrStep={decrStep}
-        />
-      ) : null}
-    </div>
+    </SignUpContext.Provider>
   );
 }
 
-function Step1Form({ incrStep, email, password, valPassword, dispatch }) {
-  const [emailError, setEmailError] = useState("");
-  const [passwordError, setPasswordError] = useState("");
-  const [valError, setValError] = useState("");
+function Step1Form() {
+  const { incrStep, email, password, valPassword, dispatch } =
+    useContext(SignUpContext);
+
+  const [{ emailError, passwordError, valError }, setErrors] = useReducer(
+    Step1Reducer,
+    initialStep1State,
+  );
+
+  const emailRef = useRef(null);
+  const passwordRef = useRef(null);
+  const valRef = useRef(null);
 
   function handleEmail(value) {
     dispatch({ label: "setEmail", payload: value });
 
-    setEmailError("");
+    setErrors({ label: "clearEmailError" });
   }
 
   function handlePassword(value) {
     dispatch({ label: "setPassword", payload: value });
 
-    setPasswordError("");
+    setErrors({ label: "clearPasswordError" });
   }
 
   function handleValPassword(value) {
     dispatch({ label: "setValPassword", payload: value });
 
-    setValError("");
+    setErrors({ label: "clearValError" });
   }
 
   function handleSubmit(e) {
     e.preventDefault();
 
     if (!email && !password && !valPassword) {
-      setPasswordError("Please enter your password");
-      setEmailError("Please enter your email");
-      setValError("Please enter your password");
+      setErrors({ label: "allError" });
+      emailRef.current.focus();
       return;
     }
 
     if (!email) {
-      setEmailError("Please enter your email");
+      setErrors({ label: "emailError", payload: emailEmpty });
+      emailRef.current.focus();
       return;
     }
 
     if (!password) {
-      setPasswordError("Please enter your password");
+      setErrors({ label: "passwordError", payload: passwordEmpty });
+      passwordRef.current.focus();
+      return;
     }
 
     if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+/.test(password)) {
-      setPasswordError(
-        "Must contain uppercase & lowercase letters and a number",
-      );
+      setErrors({ label: "passwordError", payload: invalidPassword });
+      passwordRef.current.focus();
       return;
     }
 
     if (!valPassword) {
-      setValError("Please enter your password again");
-      7;
-
+      setErrors({ label: "valError", payload: valEmpty });
+      valRef.current.focus();
       return;
     }
 
     if (password !== valPassword) {
-      setValError("Passwords do not match");
-      setPasswordError("Passwords do not match");
+      setErrors({ label: "notMatch", payload: passwordsNotMatch });
+      valRef.current.focus();
       return;
     }
 
@@ -327,6 +311,7 @@ function Step1Form({ incrStep, email, password, valPassword, dispatch }) {
         ) : null}
 
         <input
+          ref={emailRef}
           className="input-style"
           type="email"
           id="Email"
@@ -342,6 +327,7 @@ function Step1Form({ incrStep, email, password, valPassword, dispatch }) {
         ) : null}
 
         <input
+          ref={passwordRef}
           className="input-style"
           type="password"
           id="Password"
@@ -355,6 +341,7 @@ function Step1Form({ incrStep, email, password, valPassword, dispatch }) {
         {valError ? <p className="text-xs  text-red-600">{valError}</p> : null}
 
         <input
+          ref={valRef}
           className="input-style"
           type="password"
           id="validate"
@@ -369,52 +356,57 @@ function Step1Form({ incrStep, email, password, valPassword, dispatch }) {
   );
 }
 
-function Step2Form({ decrStep, incrStep, matricNo, college, dept, dispatch }) {
-  const [allColleges, setAllColleges] = useState([]);
-  const [allDepts, setAllDepts] = useState([]);
+function Step2Form() {
+  const { decrStep, incrStep, matricNo, college, dept, dispatch } =
+    useContext(SignUpContext);
+
+  const [
+    { allColleges, allDepts, errorMatric, errorDept, errorColl },
+    dispatch2,
+  ] = useReducer(Step2Reducer, initialStep2State);
+
+  const matricRef = useRef(null);
+  const collegeRef = useRef(null);
+  const deptRef = useRef(null);
 
   const sortedDepts = sortArrayBasedOnLetters(allDepts);
-
-  const [errorMatric, setErrorMatric] = useState("");
-  const [errorColl, setErrorColl] = useState("");
-  const [errorDept, setErrorDept] = useState("");
 
   function handleSubmit(e) {
     e.preventDefault();
 
     if (!matricNo && !college && !dept) {
-      setErrorMatric("Please enter your matric number");
-      setErrorDept("Please select your department");
-      setErrorColl("Please select your college");
+      dispatch2({ label: "allErr" });
+      matricRef.current.focus();
       return;
     }
 
     if (!matricNo) {
-      setErrorMatric("Please enter your matric number");
+      dispatch2({
+        label: "matricErr",
+        payload: "Please enter your matric number",
+      });
+      matricRef.current.focus();
       return;
     }
 
     if (!college) {
-      setErrorColl("Please select your college");
-
-      if (!/^[0-9]{4}\/[0-9]{4}$/.test(matricNo)) {
-        setErrorMatric("Please enter a valid matric number");
-      }
-      return;
-    }
-
-    if (!dept) {
-      setErrorDept("Please select your department");
-      7;
-
-      if (!/^[0-9]{4}\/[0-9]{4}$/.test(matricNo)) {
-        setErrorMatric("Please enter a valid matric number");
-      }
+      dispatch2({ label: "collErr", payload: "Please select your college" });
+      collegeRef.current.focus();
       return;
     }
 
     if (!/^[0-9]{4}\/[0-9]{4}$/.test(matricNo)) {
-      setErrorMatric("Please enter a valid matric number");
+      dispatch2({
+        label: "matricErr",
+        payload: "Please enter a valid matric number",
+      });
+      matricRef.current.focus();
+      return;
+    }
+
+    if (!dept) {
+      dispatch2({ label: "deptErr", payload: "Please select your department" });
+      deptRef.current.focus();
       return;
     }
 
@@ -425,19 +417,19 @@ function Step2Form({ decrStep, incrStep, matricNo, college, dept, dispatch }) {
   function handleMatric(value) {
     dispatch({ label: "setMatricNo", payload: value });
 
-    setErrorMatric("");
+    dispatch2({ label: "clearMatricErr" });
   }
 
   function handleCollege(value) {
     dispatch({ label: "setCollege", payload: value });
 
-    setErrorColl("");
+    dispatch2({ label: "clearCollErr" });
   }
 
   function handleDept(value) {
     dispatch({ label: "setDept", payload: value });
 
-    setErrorDept("");
+    dispatch2({ label: "clearDeptErr" });
   }
 
   //get list of colleges on mount
@@ -446,7 +438,7 @@ function Step2Form({ decrStep, incrStep, matricNo, college, dept, dispatch }) {
     async function getColleges() {
       try {
         const colleges = await GetColleges();
-        setAllColleges(colleges);
+        dispatch2({ label: "colleges", payload: colleges });
       } catch (err) {
         console.log(err);
       }
@@ -465,7 +457,7 @@ function Step2Form({ decrStep, incrStep, matricNo, college, dept, dispatch }) {
         return c.college === college;
       }).departments;
 
-      setAllDepts(deptsInCollege);
+      dispatch2({ label: "depts", payload: deptsInCollege });
     },
     [college, allColleges],
   );
@@ -481,6 +473,7 @@ function Step2Form({ decrStep, incrStep, matricNo, college, dept, dispatch }) {
         ) : null}
 
         <input
+          ref={matricRef}
           className="input-style"
           type="text"
           id="matricNo"
@@ -494,6 +487,7 @@ function Step2Form({ decrStep, incrStep, matricNo, college, dept, dispatch }) {
         {errorColl ? <p className="text-xs text-red-600">{errorColl}</p> : null}
 
         <select
+          ref={collegeRef}
           className="input-style"
           value={college ? college : null}
           onChange={(e) => handleCollege(e.target.value)}
@@ -520,6 +514,7 @@ function Step2Form({ decrStep, incrStep, matricNo, college, dept, dispatch }) {
           ) : null}
 
           <select
+            ref={deptRef}
             className="input-style"
             value={dept ? dept : null}
             onChange={(e) => handleDept(e.target.value)}
@@ -547,11 +542,16 @@ function Step2Form({ decrStep, incrStep, matricNo, college, dept, dispatch }) {
   );
 }
 
-function Step3Form({ decrStep, selectedCourses, dispatch, handleSignUp }) {
+function Step3Form() {
+  const { decrStep, selectedCourses, dispatch, handleSignUp } =
+    useContext(SignUpContext);
+
   const [{ searchParam, loading, error, foundCourses }, dispatch2] = useReducer(
-    step3Reducer,
+    Step3Reducer,
     initialStep3State,
   );
+
+  const searchRef = useRef(null);
 
   function addCourse(e, course) {
     e.stopPropagation();
@@ -568,6 +568,13 @@ function Step3Form({ decrStep, selectedCourses, dispatch, handleSignUp }) {
 
   function handleSubmit(e) {
     e.preventDefault();
+
+    //if no course was selected, do not submit
+    if (!selectedCourses.length) {
+      searchRef.current.focus();
+      return;
+    }
+
     handleSignUp();
   }
 
@@ -610,6 +617,7 @@ function Step3Form({ decrStep, selectedCourses, dispatch, handleSignUp }) {
 
       <input
         type="search"
+        ref={searchRef}
         placeholder="Search for a course"
         className="input-style w-full "
         value={searchParam}
@@ -741,7 +749,114 @@ function BottomLinks({ checked }) {
   );
 }
 
-function step3Reducer(state, { payload, label }) {
+function SignUpReducer(state, { payload, label }) {
+  switch (label) {
+    case "setEmail":
+      return { ...state, email: payload };
+
+    case "setPassword":
+      return { ...state, password: payload };
+
+    case "setValPassword":
+      return { ...state, valPassword: payload };
+
+    case "setCollege":
+      return { ...state, college: payload };
+
+    case "setMatricNo":
+      return { ...state, matricNo: payload };
+
+    case "setDept":
+      return { ...state, dept: payload };
+
+    case "addCourse":
+      return { ...state, selectedCourses: [...state.selectedCourses, payload] };
+
+    case "removeCourse":
+      return {
+        ...state,
+        selectedCourses: state.selectedCourses.filter((c) => c !== payload),
+      };
+  }
+}
+
+function Step1Reducer(state, { payload, label }) {
+  switch (label) {
+    case "emailError":
+      return { ...state, emailError: payload };
+
+    case "passwordError":
+      return { ...state, passwordError: payload };
+
+    case "valError":
+      return { ...state, valError: payload };
+
+    case "allError":
+      return {
+        ...state,
+        valError: valEmpty,
+        passwordError: passwordEmpty,
+        emailError: emailEmpty,
+      };
+
+    case "notMatch":
+      return {
+        ...state,
+        valError: passwordsNotMatch,
+        passwordError: passwordsNotMatch,
+      };
+
+    case "clearEmailError":
+      return { ...state, emailError: "" };
+
+    case "clearPasswordError":
+      return { ...state, passwordError: "" };
+
+    case "clearValError":
+      return { ...state, valError: "" };
+  }
+}
+
+function Step2Reducer(state, { label, payload }) {
+  switch (label) {
+    case "colleges":
+      return { ...state, allColleges: payload };
+
+    case "depts":
+      return { ...state, allDepts: payload };
+
+    case "matricErr":
+      return { ...state, errorMatric: payload };
+
+    case "collErr":
+      return { ...state, errorColl: payload };
+
+    case "deptErr":
+      return { ...state, errorDept: payload };
+
+    case "allErr":
+      return {
+        ...state,
+        errorMatric: "Please enter your matric number",
+        errorColl: "Please select your college",
+        errorDept: "Please select your department",
+      };
+
+    case "clearMatricErr":
+      return { ...state, errorMatric: "" };
+
+    case "clearDeptErr":
+      return { ...state, errorDept: "" };
+
+    case "clearCollErr":
+      return { ...state, errorColl: "" };
+
+    case "clearAll":
+      return { ...state, errorColl: "", errorDept: "", errorMatric: "" };
+  }
+}
+
+function Step3Reducer(state, { payload, label }) {
   switch (label) {
     case "searching":
       return { ...state, searchParam: payload, loading: true };
@@ -757,11 +872,35 @@ function step3Reducer(state, { payload, label }) {
   }
 }
 
+const initialSignUpState = {
+  selectedCourses: [],
+  matricNo: "",
+  college: "",
+  dept: "",
+  email: "",
+  password: "",
+  valPassword: "",
+};
+
+const initialStep1State = {
+  emailError: "",
+  passwordError: "",
+  valError: "",
+};
+
 const initialStep3State = {
   searchParam: "",
   foundCourses: [],
   error: "",
   loading: false,
+};
+
+const initialStep2State = {
+  allColleges: [],
+  allDepts: [],
+  errorMatric: "",
+  errorColl: "",
+  errorDept: "",
 };
 
 export default Login;

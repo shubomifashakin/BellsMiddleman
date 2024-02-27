@@ -1,3 +1,10 @@
+export const emailEmpty = "Please enter your email";
+export const passwordEmpty = "Please enter your password";
+export const valEmpty = "Please enter your password";
+export const invalidPassword =
+  "Must contain uppercase & lowercase letters and a number";
+export const passwordsNotMatch = "Passwords do not match";
+
 export function sortArrayBasedOnLetters(arr) {
   return arr.sort((a, b) => {
     // Convert both strings to lowercase to ensure case-insensitive sorting
