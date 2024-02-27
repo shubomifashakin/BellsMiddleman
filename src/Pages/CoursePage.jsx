@@ -1,12 +1,12 @@
 import { Outlet } from "react-router";
 
-function Course() {
+function CoursePage() {
   return (
     <div>
-      <p>courses</p>
+      <p>Courses</p>
       <Outlet />
     </div>
   );
 }
 
-export default Course;
+export default CoursePage;

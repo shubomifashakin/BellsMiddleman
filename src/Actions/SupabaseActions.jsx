@@ -50,3 +50,7 @@ export async function GetColleges() {
 
   return Colleges;
 }
+
+export async function ForgotPassword(email) {
+  let { data, error } = await supabase.auth.resetPasswordForEmail(email);
+}

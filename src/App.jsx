@@ -1,21 +1,26 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import Layout from "./Components/Layout";
-import Home from "./Pages/Home";
-import Login from "./Pages/Login";
-import Course from "./Pages/Course";
-import Assignments from "./Pages/Assignments";
-import Notes from "./Pages/Notes";
+
 import { Toaster } from "react-hot-toast";
 
+import LoginPage from "./Pages/LoginPage";
+import HomePage from "./Pages/HomePage";
+import CoursePage from "./Pages/CoursePage";
+import AssignmentsPage from "./Pages/AssignmentsPage";
+import NotesPage from "./Pages/NotesPage";
+import ForgotPassswordPage from "./Pages/ForgotPassswordPage";
+
+import Layout from "./Components/Layout";
+
 const router = createBrowserRouter([
-  { path: "/", element: <Login /> },
-  { element: <Layout />, children: [{ path: "home", element: <Home /> }] },
+  { path: "/", element: <LoginPage /> },
+  { path: "forgotPassword", element: <ForgotPassswordPage /> },
+  { element: <Layout />, children: [{ path: "home", element: <HomePage /> }] },
   {
     path: "/:code",
-    element: <Course />,
+    element: <CoursePage />,
     children: [
-      { path: "assignments", element: <Assignments /> },
-      { path: "notes", element: <Notes /> },
+      { path: "assignments", element: <AssignmentsPage /> },
+      { path: "notes", element: <NotesPage /> },
     ],
   },
 ]);

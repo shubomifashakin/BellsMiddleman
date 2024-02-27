@@ -33,7 +33,161 @@ import {
   valEmpty,
 } from "../Actions/HelperActions";
 
-function Login() {
+const initialSignUpState = {
+  selectedCourses: [],
+  matricNo: "",
+  college: "",
+  dept: "",
+  email: "",
+  password: "",
+  valPassword: "",
+};
+
+const initialStep1State = {
+  emailError: "",
+  passwordError: "",
+  valError: "",
+};
+
+const initialStep3State = {
+  searchParam: "",
+  foundCourses: [],
+  error: "",
+  loading: false,
+};
+
+const initialStep2State = {
+  allColleges: [],
+  allDepts: [],
+  errorMatric: "",
+  errorColl: "",
+  errorDept: "",
+};
+
+function SignUpReducer(state, { payload, label }) {
+  switch (label) {
+    case "setEmail":
+      return { ...state, email: payload };
+
+    case "setPassword":
+      return { ...state, password: payload };
+
+    case "setValPassword":
+      return { ...state, valPassword: payload };
+
+    case "setCollege":
+      return { ...state, college: payload };
+
+    case "setMatricNo":
+      return { ...state, matricNo: payload };
+
+    case "setDept":
+      return { ...state, dept: payload };
+
+    case "addCourse":
+      return { ...state, selectedCourses: [...state.selectedCourses, payload] };
+
+    case "removeCourse":
+      return {
+        ...state,
+        selectedCourses: state.selectedCourses.filter((c) => c !== payload),
+      };
+  }
+}
+
+function Step1Reducer(state, { payload, label }) {
+  switch (label) {
+    case "emailError":
+      return { ...state, emailError: payload };
+
+    case "passwordError":
+      return { ...state, passwordError: payload };
+
+    case "valError":
+      return { ...state, valError: payload };
+
+    case "allError":
+      return {
+        ...state,
+        valError: valEmpty,
+        passwordError: passwordEmpty,
+        emailError: emailEmpty,
+      };
+
+    case "notMatch":
+      return {
+        ...state,
+        valError: passwordsNotMatch,
+        passwordError: passwordsNotMatch,
+      };
+
+    case "clearEmailError":
+      return { ...state, emailError: "" };
+
+    case "clearPasswordError":
+      return { ...state, passwordError: "" };
+
+    case "clearValError":
+      return { ...state, valError: "" };
+  }
+}
+
+function Step2Reducer(state, { label, payload }) {
+  switch (label) {
+    case "colleges":
+      return { ...state, allColleges: payload };
+
+    case "depts":
+      return { ...state, allDepts: payload };
+
+    case "matricErr":
+      return { ...state, errorMatric: payload };
+
+    case "collErr":
+      return { ...state, errorColl: payload };
+
+    case "deptErr":
+      return { ...state, errorDept: payload };
+
+    case "allErr":
+      return {
+        ...state,
+        errorMatric: "Please enter your matric number",
+        errorColl: "Please select your college",
+        errorDept: "Please select your department",
+      };
+
+    case "clearMatricErr":
+      return { ...state, errorMatric: "" };
+
+    case "clearDeptErr":
+      return { ...state, errorDept: "" };
+
+    case "clearCollErr":
+      return { ...state, errorColl: "" };
+
+    case "clearAll":
+      return { ...state, errorColl: "", errorDept: "", errorMatric: "" };
+  }
+}
+
+function Step3Reducer(state, { payload, label }) {
+  switch (label) {
+    case "searching":
+      return { ...state, searchParam: payload, loading: true };
+
+    case "stopLoading":
+      return { ...state, loading: false };
+
+    case "error":
+      return { ...state, loading: false, error: payload };
+
+    case "foundCourses":
+      return { ...state, loading: false, foundCourses: payload };
+  }
+}
+
+function LoginPage() {
   const [checked, setChecked] = useState(false);
   const navigate = useNavigate();
 
@@ -130,12 +284,11 @@ function LoginInForm() {
           />
         </InputGroup>
 
-        <button
-          type="submit"
+        <Button
+          type={"full"}
+          label={"Log In"}
           className="font-base  block w-full rounded-sm bg-bellsBlue p-2 text-center text-base text-white duration-300 hover:bg-hoverBellsBlue"
-        >
-          Log In
-        </button>
+        ></Button>
       </form>
     </div>
   );
@@ -693,7 +846,7 @@ function Step3Form() {
   );
 }
 
-function Button({ action, label }) {
+function Button({ action, label, type = "small" }) {
   return action ? (
     <button
       onClick={action}
@@ -705,7 +858,7 @@ function Button({ action, label }) {
   ) : (
     <button
       type="submit"
-      className="font-base block self-end rounded-sm bg-bellsBlue p-1.5 text-center text-base text-white duration-300 hover:bg-hoverBellsBlue"
+      className={`font-base block self-end ${type === "full" ? "w-full p-2" : ""} rounded-sm bg-bellsBlue ${type === "small" ? "px-5  py-1.5" : ""} text-center text-base text-white duration-300 hover:bg-hoverBellsBlue`}
     >
       {label}
     </button>
@@ -725,6 +878,8 @@ function InputGroup({ label, children }) {
 }
 
 function BottomLinks({ checked }) {
+  const navigate = useNavigate();
+
   return (
     <div className="flex flex-col items-center justify-center space-y-2">
       <p className="text-center text-xs">
@@ -738,169 +893,15 @@ function BottomLinks({ checked }) {
       </p>
 
       {!checked ? (
-        <a
-          href="#"
-          className="text-xs underline transition-colors duration-300 ease-in-out hover:text-hoverBellsBlue"
+        <button
+          onClick={() => navigate("/forgotPassword")}
+          className="border-none text-xs underline outline-none transition-colors duration-300 ease-in-out hover:text-hoverBellsBlue"
         >
           Forgot Password?
-        </a>
+        </button>
       ) : null}
     </div>
   );
 }
 
-function SignUpReducer(state, { payload, label }) {
-  switch (label) {
-    case "setEmail":
-      return { ...state, email: payload };
-
-    case "setPassword":
-      return { ...state, password: payload };
-
-    case "setValPassword":
-      return { ...state, valPassword: payload };
-
-    case "setCollege":
-      return { ...state, college: payload };
-
-    case "setMatricNo":
-      return { ...state, matricNo: payload };
-
-    case "setDept":
-      return { ...state, dept: payload };
-
-    case "addCourse":
-      return { ...state, selectedCourses: [...state.selectedCourses, payload] };
-
-    case "removeCourse":
-      return {
-        ...state,
-        selectedCourses: state.selectedCourses.filter((c) => c !== payload),
-      };
-  }
-}
-
-function Step1Reducer(state, { payload, label }) {
-  switch (label) {
-    case "emailError":
-      return { ...state, emailError: payload };
-
-    case "passwordError":
-      return { ...state, passwordError: payload };
-
-    case "valError":
-      return { ...state, valError: payload };
-
-    case "allError":
-      return {
-        ...state,
-        valError: valEmpty,
-        passwordError: passwordEmpty,
-        emailError: emailEmpty,
-      };
-
-    case "notMatch":
-      return {
-        ...state,
-        valError: passwordsNotMatch,
-        passwordError: passwordsNotMatch,
-      };
-
-    case "clearEmailError":
-      return { ...state, emailError: "" };
-
-    case "clearPasswordError":
-      return { ...state, passwordError: "" };
-
-    case "clearValError":
-      return { ...state, valError: "" };
-  }
-}
-
-function Step2Reducer(state, { label, payload }) {
-  switch (label) {
-    case "colleges":
-      return { ...state, allColleges: payload };
-
-    case "depts":
-      return { ...state, allDepts: payload };
-
-    case "matricErr":
-      return { ...state, errorMatric: payload };
-
-    case "collErr":
-      return { ...state, errorColl: payload };
-
-    case "deptErr":
-      return { ...state, errorDept: payload };
-
-    case "allErr":
-      return {
-        ...state,
-        errorMatric: "Please enter your matric number",
-        errorColl: "Please select your college",
-        errorDept: "Please select your department",
-      };
-
-    case "clearMatricErr":
-      return { ...state, errorMatric: "" };
-
-    case "clearDeptErr":
-      return { ...state, errorDept: "" };
-
-    case "clearCollErr":
-      return { ...state, errorColl: "" };
-
-    case "clearAll":
-      return { ...state, errorColl: "", errorDept: "", errorMatric: "" };
-  }
-}
-
-function Step3Reducer(state, { payload, label }) {
-  switch (label) {
-    case "searching":
-      return { ...state, searchParam: payload, loading: true };
-
-    case "stopLoading":
-      return { ...state, loading: false };
-
-    case "error":
-      return { ...state, loading: false, error: payload };
-
-    case "foundCourses":
-      return { ...state, loading: false, foundCourses: payload };
-  }
-}
-
-const initialSignUpState = {
-  selectedCourses: [],
-  matricNo: "",
-  college: "",
-  dept: "",
-  email: "",
-  password: "",
-  valPassword: "",
-};
-
-const initialStep1State = {
-  emailError: "",
-  passwordError: "",
-  valError: "",
-};
-
-const initialStep3State = {
-  searchParam: "",
-  foundCourses: [],
-  error: "",
-  loading: false,
-};
-
-const initialStep2State = {
-  allColleges: [],
-  allDepts: [],
-  errorMatric: "",
-  errorColl: "",
-  errorDept: "",
-};
-
-export default Login;
+export default LoginPage;
