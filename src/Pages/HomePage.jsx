@@ -1,8 +1,6 @@
-import { useEffect, useState } from "react";
 import { GetStudentsData } from "../Actions/SupabaseActions";
 import { useLoaderData, useNavigate } from "react-router";
 import { sortArrayBasedOnLetters } from "../Actions/HelperActions";
-import { Link } from "react-router-dom";
 import { Button } from "../Components/Button";
 
 function HomePage() {
