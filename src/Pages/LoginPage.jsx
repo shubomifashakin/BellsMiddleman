@@ -212,10 +212,10 @@ function LoginPage() {
   useEffect(
     function () {
       if (!hasExpired) {
-        navigate("/home");
+        navigate("home");
       }
     },
-    [hasExpired, navigate, loggedInfo],
+    [hasExpired, navigate],
   );
 
   //if it has expired, return the sign in page, if not, return nothing cus we are redirecting
