@@ -8,7 +8,7 @@ export async function SignUpUser(details) {
     password,
     options: {
       data: {
-        courses,
+        courses: JSON.stringify(courses),
         college,
         matricNo,
         dept,
@@ -52,6 +52,15 @@ export async function GetColleges() {
   return Colleges;
 }
 
-export async function ForgotPassword(email) {
+export async function ResetPassword(email) {
   let { data, error } = await supabase.auth.resetPasswordForEmail(email);
+}
+
+export async function GetStudentsData() {
+  let { data: Students, error } = await supabase
+    .from("Students")
+    .select("college,matric_no,dept,courses,created_at");
+  if (error?.message) throw error;
+
+  return Students;
 }

@@ -7,7 +7,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import { useForm } from "react-hook-form";
 
@@ -16,6 +16,8 @@ import toast from "react-hot-toast";
 import { IoIosAddCircle, IoIosCloseCircle } from "react-icons/io";
 
 import { CheckBox } from "../Components/CheckBox";
+import { InputGroup } from "../Components/InputGroup";
+import { Button } from "../Components/Button";
 
 import {
   FindCourse,
@@ -716,6 +718,7 @@ function Step3Form() {
     if (selectedCourses.includes(course)) return;
     dispatch({ label: "addCourse", payload: course });
     dispatch2({ label: "clearSearchParam" });
+    searchRef.current.focus();
   }
 
   function removeCourse(e, course) {
@@ -853,40 +856,7 @@ function Step3Form() {
   );
 }
 
-function Button({ action, label, type = "small" }) {
-  return action ? (
-    <button
-      onClick={action}
-      type="button"
-      className="font-base  block rounded-sm bg-bellsBlue p-1.5 text-center text-base text-white duration-300 hover:bg-hoverBellsBlue"
-    >
-      {label}
-    </button>
-  ) : (
-    <button
-      type="submit"
-      className={`font-base block self-end ${type === "full" ? "w-full p-2" : ""} rounded-sm bg-bellsBlue ${type === "small" ? "px-5  py-1.5" : ""} text-center text-base text-white duration-300 hover:bg-hoverBellsBlue`}
-    >
-      {label}
-    </button>
-  );
-}
-
-function InputGroup({ label, children }) {
-  return (
-    <div className="flex flex-col space-y-1.5">
-      <label htmlFor={label} className="text-base font-normal">
-        {label}
-      </label>
-
-      {children}
-    </div>
-  );
-}
-
 function BottomLinks({ checked }) {
-  const navigate = useNavigate();
-
   return (
     <div className="flex flex-col items-center justify-center space-y-2">
       <p className="text-center text-xs">
@@ -900,12 +870,12 @@ function BottomLinks({ checked }) {
       </p>
 
       {!checked ? (
-        <button
-          onClick={() => navigate("/forgotPassword")}
-          className="border-none text-xs underline outline-none transition-colors duration-300 ease-in-out hover:text-hoverBellsBlue"
+        <Link
+          to={"/forgotPassword"}
+          className="text-xs underline  transition-colors duration-300 ease-in-out hover:text-hoverBellsBlue"
         >
           Forgot Password?
-        </button>
+        </Link>
       ) : null}
     </div>
   );
