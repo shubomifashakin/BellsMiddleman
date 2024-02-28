@@ -3,7 +3,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 
 import LoginPage from "./Pages/LoginPage";
-import HomePage from "./Pages/HomePage";
+import HomePage, { HomeLoader } from "./Pages/HomePage";
 import CoursePage from "./Pages/CoursePage";
 import AssignmentsPage from "./Pages/AssignmentsPage";
 import NotesPage from "./Pages/NotesPage";
@@ -20,6 +20,7 @@ const router = createBrowserRouter([
     children: [
       {
         path: "home",
+        loader: HomeLoader,
         element: (
           <ProtectedRoute>
             <HomePage />

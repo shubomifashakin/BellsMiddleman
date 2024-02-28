@@ -21,8 +21,8 @@ export default {
         },
       },
       colors: {
-        primaryBgColor: "#F1F7ED",
-        bellsBlue: "#3c9ac9",
+        primaryBgColor: "#F7F4EA",
+        bellsBlue: "#272932",
         hoverBellsBlue: "#91C7B1",
       },
     },
