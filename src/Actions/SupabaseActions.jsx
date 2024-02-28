@@ -64,3 +64,9 @@ export async function GetStudentsData() {
 
   return Students;
 }
+
+export async function LogOutFn() {
+  let { error } = await supabase.auth.signOut();
+
+  if (error?.message) throw error;
+}

@@ -246,7 +246,7 @@ function LoginInForm() {
 
     try {
       await LogInUser(email, password);
-      navigate("/home");
+      navigate("home");
     } catch (err) {
       toast.error(err.message);
     }

@@ -27,18 +27,18 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
-    ],
-  },
-  {
-    path: "/:code",
-    element: (
-      <ProtectedRoute>
-        <CoursePage />
-      </ProtectedRoute>
-    ),
-    children: [
-      { path: "assignments", element: <AssignmentsPage /> },
-      { path: "notes", element: <NotesPage /> },
+      {
+        path: "/:code",
+        element: (
+          <ProtectedRoute>
+            <CoursePage />
+          </ProtectedRoute>
+        ),
+        children: [
+          { path: "assignments", element: <AssignmentsPage /> },
+          { path: "notes", element: <NotesPage /> },
+        ],
+      },
     ],
   },
 ]);
