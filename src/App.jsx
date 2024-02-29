@@ -1,10 +1,14 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import {
+  createBrowserRouter,
+  Navigate,
+  RouterProvider,
+} from "react-router-dom";
 
 import { Toaster } from "react-hot-toast";
 
 import LoginPage from "./Pages/LoginPage";
 import HomePage, { HomeLoader } from "./Pages/HomePage";
-import CoursePage from "./Pages/CoursePage";
+import CoursePage, { CourseLoader } from "./Pages/CoursePage";
 import AssignmentsPage from "./Pages/AssignmentsPage";
 import NotesPage from "./Pages/NotesPage";
 import ForgotPassswordPage from "./Pages/ForgotPassswordPage";
@@ -29,12 +33,15 @@ const router = createBrowserRouter([
       },
       {
         path: "/:code",
+        loader: CourseLoader,
+        id: "courseData",
         element: (
           <ProtectedRoute>
             <CoursePage />
           </ProtectedRoute>
         ),
         children: [
+          { index: true, element: <Navigate replace to={"notes"} /> },
           { path: "assignments", element: <AssignmentsPage /> },
           { path: "notes", element: <NotesPage /> },
         ],

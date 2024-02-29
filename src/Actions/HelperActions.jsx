@@ -20,3 +20,27 @@ export function sortArrayBasedOnLetters(arr) {
     return 0; // If stringA and stringB are equal
   });
 }
+
+export function sortArrayBasedOnCreatedAt(arr) {
+  return arr.sort((a, b) => {
+    // Convert the 'created_at' strings to Date objects for comparison
+    const dateA = new Date(a.created_at);
+    const dateB = new Date(b.created_at);
+
+    // Compare the dates
+    if (dateA < dateB) {
+      return -1; // dateA is older
+    }
+
+    if (dateA > dateB) {
+      return 1; // dateA is newer
+    }
+    return 0; // dates are equal
+  });
+}
+
+export function FormatTime(time) {
+  return Intl.DateTimeFormat(navigator.language, {
+    dateStyle: "short",
+  }).format(new Date(time));
+}

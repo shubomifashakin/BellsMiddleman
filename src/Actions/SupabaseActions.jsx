@@ -70,3 +70,48 @@ export async function LogOutFn() {
 
   if (error?.message) throw error;
 }
+
+export async function UploadAssignment(courseCode, file) {
+  const { data, error } = await supabase.storage
+    .from("Courses")
+    .upload(`${courseCode}/assignments/avatar1.png`, file, {
+      cacheControl: "3600",
+      upsert: false,
+    });
+
+  if (error?.message) throw error;
+}
+
+export async function GetListOfAllNotes(courseCode) {
+  const { data, error } = await supabase.storage
+    .from("Courses")
+    .list(`${courseCode}/notes`, {
+      offset: 0,
+      sortBy: { column: "created_at", order: "asc" },
+    });
+
+  if (error?.message) throw error;
+
+  return data;
+}
+
+export async function GetListOfAllAssignments(courseCode) {
+  const { data, error } = await supabase.storage
+    .from("Courses")
+    .list(`${courseCode}/assignments`, {
+      offset: 0,
+      sortBy: { column: "name", order: "asc" },
+    });
+
+  if (error?.message) throw error;
+
+  return data;
+}
+
+export async function DownloadFile(file) {
+  const { data, error } = await supabase.storage.from("Courses").download(file);
+
+  if (error?.message) throw error;
+
+  return data;
+}

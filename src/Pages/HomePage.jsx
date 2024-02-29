@@ -1,37 +1,18 @@
-import { GetStudentsData, LogOutFn } from "../Actions/SupabaseActions";
+import { GetStudentsData } from "../Actions/SupabaseActions";
 import { useLoaderData, useNavigate } from "react-router";
 import { sortArrayBasedOnLetters } from "../Actions/HelperActions";
-import { Button } from "../Components/Button";
+import { Navbar } from "../Components/Navbar";
 
 function HomePage() {
   const { courses, matric_no, college, dept } = useLoaderData();
 
   const navigate = useNavigate();
 
-  async function handleSignOut() {
-    try {
-      await LogOutFn();
-      navigate("/");
-    } catch (err) {
-      console.log(err);
-    }
-  }
   const courses2 = sortArrayBasedOnLetters(JSON.parse(courses));
+
   return (
     <>
-      <nav className="row-span-1  bg-bellsBlue p-4 lg:col-span-1">
-        <ul className="flex h-full items-center justify-between text-center text-sm text-white lg:flex-col">
-          <li>Home</li>
-
-          <li>
-            <Button
-              label={"Log Out"}
-              action={handleSignOut}
-              fontSize="sm"
-            ></Button>
-          </li>
-        </ul>
-      </nav>
+      <Navbar />
 
       <main className="row-span-2  space-y-2 overflow-y-auto bg-primaryBgColor  p-4 ">
         <div className="flex flex-col space-y-2 text-sm underline lg:flex-row lg:items-center lg:justify-between">
