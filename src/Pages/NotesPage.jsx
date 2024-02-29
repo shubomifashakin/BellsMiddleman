@@ -17,13 +17,19 @@ function NotesPage() {
 
   async function handleDownload(filename) {
     try {
+      // Fetch the PDF file content
       const pdfBlob = await DownloadFile(`${code}/notes/${filename}`);
 
       // Create a Blob URL from the Blob
       const pdfUrl = URL.createObjectURL(pdfBlob);
 
-      // Open the Blob URL in a new tab
-      window.open(pdfUrl, "_blank");
+      // Create a temporary anchor element
+      const a = document.createElement("a");
+      a.href = pdfUrl;
+      a.download = filename;
+
+      // trigger a click event on the anchor element
+      a.click();
 
       // Revoke the Blob URL after the tab is closed
       //this prevents the document that was opened from being opened again
