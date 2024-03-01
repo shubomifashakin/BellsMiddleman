@@ -17,7 +17,7 @@ export function Navbar({ children }) {
   }
 
   return (
-    <nav className="row-span-1 bg-bellsBlue p-4 lg:col-span-1">
+    <nav className="row-span-1 bg-bellsBlue px-6 py-4 lg:col-span-1 lg:px-4">
       <ul className="flex h-full items-center justify-between text-center text-sm lg:flex-col">
         <div className="flex basis-1/2  items-center justify-between  lg:flex-col lg:justify-normal lg:gap-10">
           <li>

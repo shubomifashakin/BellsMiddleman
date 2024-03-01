@@ -4,7 +4,7 @@ export function CourseNavLink({ path }) {
   return (
     <NavLink
       to={`${path}`}
-      className="hover:text-hoverText text-white transition-all duration-300"
+      className="text-white transition-all duration-300 hover:text-hoverText"
     >
       {path.replace("/", "")}
     </NavLink>

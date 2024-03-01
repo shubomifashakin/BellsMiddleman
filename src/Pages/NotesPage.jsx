@@ -40,14 +40,16 @@ function NotesPage() {
   }
 
   return (
-    <table className="w-full divide-y  divide-stone-400 overflow-hidden border border-stone-400 p-4 text-center ">
+    <table
+      className={`w-full divide-y  divide-stone-400 overflow-hidden border border-stone-400 p-4 text-center `}
+    >
       <thead className=" bg-bellsBlue text-white">
         <tr className="divide-x divide-stone-400">
           <th className="py-3.5 text-sm lg:text-base">S/N</th>
 
           <th className="py-3.5 text-sm lg:text-base">Title</th>
 
-          <th className="py-3.5 text-sm lg:text-base">Date</th>
+          <th className="py-3.5 text-sm lg:text-base">Uploaded</th>
         </tr>
       </thead>
 
@@ -55,7 +57,7 @@ function NotesPage() {
         {sortedNotes.map((note, index) => {
           return (
             <tr
-              className="cursor-pointer divide-x divide-stone-400   transition-all duration-300 ease-in-out hover:bg-bellsBlue hover:text-white"
+              className={`cursor-pointer divide-x divide-stone-400   transition-all duration-300 ease-in-out hover:bg-bellsBlue hover:text-white ${index % 2 ? "bg-tableEven" : "bg-tableOdd"}`}
               onClick={() => handleDownload(note.name)}
               key={index}
             >

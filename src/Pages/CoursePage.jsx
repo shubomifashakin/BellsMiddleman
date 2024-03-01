@@ -16,7 +16,7 @@ function CoursePage() {
         </li>
       </Navbar>
 
-      <main className="row-span-2 flex flex-col items-center space-y-4 p-4">
+      <main className="row-span-2 flex flex-col items-center space-y-4 px-6 py-4">
         <div className="space-x-5 rounded-sm bg-bellsBlue px-4 py-2">
           <CourseNavLink path={"Notes"} />
           <CourseNavLink path={"Assignments"} />

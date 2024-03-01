@@ -24,6 +24,8 @@ export default {
         primaryBgColor: "#F7F4EA",
         bellsBlue: "#011638",
         hoverBellsBlue: "#0E3B43",
+        tableEven: "#d2e9fb",
+        tableOdd: "#eaf5fd",
         hoverText: "#FCFC62",
       },
     },
