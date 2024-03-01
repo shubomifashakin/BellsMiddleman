@@ -14,7 +14,7 @@ function HomePage() {
     <>
       <Navbar />
 
-      <main className="row-span-2 flex flex-col  space-y-4  px-6 py-4 ">
+      <main className="row-span-2 flex flex-col  space-y-4  px-6 py-4 lg:py-2 ">
         <div className="flex cursor-default flex-col space-y-2  text-xs text-white lg:flex-row lg:items-center lg:justify-between">
           <p className=" rounded-sm bg-bellsBlue px-2 py-2 shadow-sm">
             Matric No: <span className="font-semibold">{matric_no}</span>
