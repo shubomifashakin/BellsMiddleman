@@ -51,19 +51,21 @@ const initialStep1State = {
   valError: "",
 };
 
-const initialStep3State = {
-  searchParam: "",
-  foundCourses: [],
-  error: "",
-  loading: false,
-};
-
 const initialStep2State = {
   allColleges: [],
   allDepts: [],
   errorMatric: "",
   errorColl: "",
   errorDept: "",
+  loadingColleges: false,
+  errorFetching: false,
+};
+
+const initialStep3State = {
+  searchParam: "",
+  foundCourses: [],
+  error: "",
+  loading: false,
 };
 
 function SignUpReducer(state, { payload, label }) {
@@ -136,8 +138,14 @@ function Step1Reducer(state, { payload, label }) {
 
 function Step2Reducer(state, { label, payload }) {
   switch (label) {
+    case "fetching":
+      return { ...state, loadingColleges: true, errorFetching: false };
+
+    case "errorFetching":
+      return { ...state, errorFetching: true, loadingColleges: false };
+
     case "colleges":
-      return { ...state, allColleges: payload };
+      return { ...state, allColleges: payload, loading: false };
 
     case "depts":
       return { ...state, allDepts: payload };
@@ -519,7 +527,15 @@ function Step2Form() {
     useContext(SignUpContext);
 
   const [
-    { allColleges, allDepts, errorMatric, errorDept, errorColl },
+    {
+      allColleges,
+      allDepts,
+      errorMatric,
+      errorDept,
+      errorColl,
+      loadingColleges,
+      errorFetching,
+    },
     dispatch2,
   ] = useReducer(Step2Reducer, initialStep2State);
 
@@ -590,18 +606,18 @@ function Step2Form() {
     dispatch2({ label: "clearDeptErr" });
   }
 
+  async function getColleges() {
+    try {
+      dispatch2({ label: "fetching" });
+      const colleges = await GetColleges();
+      dispatch2({ label: "colleges", payload: colleges });
+    } catch (err) {
+      dispatch2({ label: "errorFetching" });
+    }
+  }
+
   //get list of colleges on mount
   useLayoutEffect(function () {
-    //get list of colleges
-    async function getColleges() {
-      try {
-        const colleges = await GetColleges();
-        dispatch2({ label: "colleges", payload: colleges });
-      } catch (err) {
-        console.log(err);
-      }
-    }
-
     getColleges();
   }, []);
 
@@ -642,6 +658,19 @@ function Step2Form() {
       </InputGroup>
 
       <InputGroup label={"College"}>
+        {loadingColleges ? (
+          <p className="text-xs text-green-500">Fetching Colleges</p>
+        ) : null}
+
+        {errorFetching ? (
+          <p
+            onClick={getColleges}
+            className="cursor-pointer text-xs font-bold capitalize text-red-600 transition-colors duration-300 ease-in-out hover:text-red-800"
+          >
+            Failed to fetch colleges, click to retry
+          </p>
+        ) : null}
+
         {errorColl ? <p className="text-xs text-red-600">{errorColl}</p> : null}
 
         <select

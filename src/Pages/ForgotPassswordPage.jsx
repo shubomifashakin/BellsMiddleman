@@ -24,7 +24,7 @@ function ForgotPasswordPage() {
   }
 
   return (
-    <main className="flex h-dvh w-full items-center justify-center bg-primaryBgColor px-6">
+    <main className="flex h-dvh w-full items-center justify-center bg-primaryBgColor px-6 py-4">
       <form
         className=" flex h-full w-full flex-col justify-center  space-y-3 rounded-sm  p-2 lg:w-1/2"
         onSubmit={handleReset}
