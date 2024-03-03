@@ -71,13 +71,19 @@ export async function LogOutFn() {
   if (error?.message) throw error;
 }
 
-export async function UploadAssignment(courseCode, file) {
-  const { data, error } = await supabase.storage
+export async function UploadAssignment(details) {
+  const { courseCode, matric_no, dept, file, assName, college } = details;
+
+  const { error } = await supabase.storage
     .from("Courses")
-    .upload(`${courseCode}/assignments/avatar1.png`, file, {
-      cacheControl: "3600",
-      upsert: false,
-    });
+    .upload(
+      `${courseCode}/assignments/submissions/${assName}/${matric_no.replaceAll("/", "-")}-${college}-${dept}`,
+      file,
+      {
+        cacheControl: "3600",
+        upsert: false,
+      },
+    );
 
   if (error?.message) throw error;
 }
@@ -98,7 +104,7 @@ export async function GetListOfAllNotes(courseCode) {
 export async function GetListOfAllAssignments(courseCode) {
   const { data, error } = await supabase.storage
     .from("Courses")
-    .list(`${courseCode}/assignments`, {
+    .list(`${courseCode}/assignments/uploads`, {
       offset: 0,
       sortBy: { column: "name", order: "asc" },
     });
@@ -108,8 +114,10 @@ export async function GetListOfAllAssignments(courseCode) {
   return data;
 }
 
-export async function DownloadFile(file) {
-  const { data, error } = await supabase.storage.from("Courses").download(file);
+export async function DownloadFile(filePath) {
+  const { data, error } = await supabase.storage
+    .from("Courses")
+    .download(filePath);
 
   if (error?.message) throw error;
 

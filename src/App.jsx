@@ -15,6 +15,8 @@ import ForgotPassswordPage from "./Pages/ForgotPassswordPage";
 
 import Layout from "./Components/Layout";
 import ProtectedRoute from "./Components/ProtectedRoute";
+import SubmissionsPage from "./Pages/SubmissionsPage";
+import { GetStudentsData } from "./Actions/SupabaseActions";
 
 const router = createBrowserRouter([
   { path: "/", element: <LoginPage /> },
@@ -46,6 +48,11 @@ const router = createBrowserRouter([
           { path: "notes", element: <NotesPage /> },
         ],
       },
+      {
+        path: "submissions/:code/:assName",
+        loader: GetStudentsData,
+        element: <SubmissionsPage />,
+      },
     ],
   },
 ]);
@@ -63,7 +70,7 @@ export default function App() {
             },
           },
           error: {
-            duration: 10 * 1000,
+            duration: 1000 * 5,
             style: {
               background: "#ff6865",
             },

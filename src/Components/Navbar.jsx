@@ -21,7 +21,7 @@ export function Navbar({ children }) {
       {/*navbar for small displays */}
       <ul className="flex items-center justify-between lg:hidden">
         <li>
-          <CourseNavLink path={"/Home"} />
+          <CourseNavLink path={"/Home"} label={"Home"} />
         </li>
 
         {children}
@@ -41,7 +41,7 @@ export function Navbar({ children }) {
       <ul className="hidden h-full flex-col items-center justify-between text-center text-sm lg:flex">
         <div className="flex basis-1/2  flex-col items-center gap-10">
           <li>
-            <CourseNavLink path={"/Home"} />
+            <CourseNavLink path={"/Home"} label={"Home"} />
           </li>
 
           {children}
