@@ -38,26 +38,22 @@ export function Navbar({ children }) {
       </ul>
 
       {/**only for large displays */}
-      <ul className="hidden h-full flex-col items-center justify-between text-center text-sm lg:flex">
-        <div className="flex basis-1/2  flex-col items-center gap-10">
-          <li>
-            <CourseNavLink path={"/Home"} label={"Home"} />
-          </li>
+      <ul className="hidden h-full flex-col items-center gap-5 text-center text-sm lg:flex">
+        <li>
+          <CourseNavLink path={"/Home"} label={"Home"} />
+        </li>
 
-          {children}
-        </div>
+        {children}
 
-        <div className="flex basis-1/2 items-end justify-end">
-          <li>
-            <Button
-              label={"Log Out"}
-              action={handleSignOut}
-              fontSize="sm"
-              bg={false}
-              type="text"
-            ></Button>
-          </li>
-        </div>
+        <li>
+          <Button
+            label={"Log Out"}
+            action={handleSignOut}
+            fontSize="sm"
+            bg={false}
+            type="text"
+          ></Button>
+        </li>
       </ul>
     </nav>
   );

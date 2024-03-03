@@ -11,7 +11,11 @@ import {
 
 function NotesPage() {
   const { notes } = useRouteLoaderData("courseData");
-  const sortedNotes = sortArrayBasedOnCreatedAt(notes);
+
+  //removes supabase placeholder file from array
+  const allNotes = notes.filter((c) => c.name !== ".emptyFolderPlaceholder");
+
+  const sortedNotes = sortArrayBasedOnCreatedAt(allNotes);
 
   const { code } = useParams();
 

@@ -247,15 +247,19 @@ function LoginInForm() {
   const navigate = useNavigate();
   const { formState, register, handleSubmit } = useForm();
 
+  const [submitting, setSubmitting] = useState(false);
   const { errors } = formState;
 
   async function handleLogin(userData) {
     const { password, email } = userData;
 
     try {
+      setSubmitting(true);
       await LogInUser(email, password);
+      setSubmitting(false);
       navigate("home");
     } catch (err) {
+      setSubmitting(false);
       toast.error(err.message);
     }
   }
@@ -298,10 +302,11 @@ function LoginInForm() {
         </InputGroup>
 
         <Button
+          disabled={submitting}
           type={"full"}
           label={"Log In"}
           className="font-base  block w-full rounded-sm bg-bellsBlue p-2 text-center text-base text-white duration-300 hover:bg-hoverBellsBlue"
-        ></Button>
+        />
       </form>
     </div>
   );
@@ -311,6 +316,8 @@ const SignUpContext = createContext(null);
 
 function SignUpForm({ setChecked }) {
   const [step, setStep] = useState(1);
+
+  const [submitting, setSubmitting] = useState(false);
 
   const [
     { selectedCourses, matricNo, college, dept, email, password, valPassword },
@@ -339,12 +346,15 @@ function SignUpForm({ setChecked }) {
   //handles the signing up
   async function handleSignUp() {
     try {
-      const createUser = await SignUpUser(signUpDetails);
+      setSubmitting(true);
+      await SignUpUser(signUpDetails);
       toast.success(`An email has been sent to ${email}`);
 
       //show log in ui
+      setSubmitting(false);
       setChecked(false);
     } catch (error) {
+      setSubmitting(false);
       toast.error(error.message);
     }
   }
@@ -361,6 +371,7 @@ function SignUpForm({ setChecked }) {
     decrStep,
     selectedCourses,
     handleSignUp,
+    submitting,
   };
 
   return (
@@ -730,7 +741,7 @@ function Step2Form() {
 }
 
 function Step3Form() {
-  const { decrStep, selectedCourses, dispatch, handleSignUp } =
+  const { decrStep, selectedCourses, dispatch, handleSignUp, submitting } =
     useContext(SignUpContext);
 
   const [{ searchParam, loading, error, foundCourses }, dispatch2] = useReducer(
@@ -879,7 +890,7 @@ function Step3Form() {
       <div className="flex justify-between">
         <Button action={decrStep} label={"Previous"} />
 
-        <Button label={"Sign Up"} />
+        <Button disabled={submitting} label={"Sign Up"} />
       </div>
     </form>
   );

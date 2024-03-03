@@ -12,11 +12,10 @@ import CoursePage, { CourseLoader } from "./Pages/CoursePage";
 import AssignmentsPage from "./Pages/AssignmentsPage";
 import NotesPage from "./Pages/NotesPage";
 import ForgotPassswordPage from "./Pages/ForgotPassswordPage";
+import SubmissionsPage, { SubmissionsLoader } from "./Pages/SubmissionsPage";
 
 import Layout from "./Components/Layout";
 import ProtectedRoute from "./Components/ProtectedRoute";
-import SubmissionsPage from "./Pages/SubmissionsPage";
-import { GetStudentsData } from "./Actions/SupabaseActions";
 
 const router = createBrowserRouter([
   { path: "/", element: <LoginPage /> },
@@ -50,7 +49,7 @@ const router = createBrowserRouter([
       },
       {
         path: "submissions/:code/:assName",
-        loader: GetStudentsData,
+        loader: SubmissionsLoader,
         element: <SubmissionsPage />,
       },
     ],

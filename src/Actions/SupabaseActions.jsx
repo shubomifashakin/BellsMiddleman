@@ -88,25 +88,24 @@ export async function UploadAssignment(details) {
   if (error?.message) throw error;
 }
 
-export async function GetListOfAllNotes(courseCode) {
-  const { data, error } = await supabase.storage
-    .from("Courses")
-    .list(`${courseCode}/notes`, {
-      offset: 0,
-      sortBy: { column: "created_at", order: "asc" },
-    });
+export async function GetListOfAllFilesInFolder(path) {
+  const { data, error } = await supabase.storage.from("Courses").list(path, {
+    offset: 0,
+    sortBy: { column: "name", order: "asc" },
+  });
 
   if (error?.message) throw error;
 
   return data;
 }
 
-export async function GetListOfAllAssignments(courseCode) {
+export async function FileExists({ filePath, fileName }) {
   const { data, error } = await supabase.storage
     .from("Courses")
-    .list(`${courseCode}/assignments/uploads`, {
+    .list(filePath, {
       offset: 0,
       sortBy: { column: "name", order: "asc" },
+      search: fileName,
     });
 
   if (error?.message) throw error;

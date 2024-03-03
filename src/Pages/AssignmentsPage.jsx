@@ -4,6 +4,11 @@ import { FormatTime } from "../Actions/HelperActions";
 function AssignmentsPage() {
   const { assignments } = useRouteLoaderData("courseData");
 
+  //removes supabase placeholder file from array
+  const allAssignments = assignments.filter(
+    (c) => c.name !== ".emptyFolderPlaceholder",
+  );
+
   const navigate = useNavigate();
   const { code } = useParams();
 
@@ -26,7 +31,7 @@ function AssignmentsPage() {
       </thead>
 
       <tbody className="divide-y divide-stone-400">
-        {assignments.map((assignment, index) => {
+        {allAssignments.map((assignment, index) => {
           return (
             <tr
               className={`cursor-pointer divide-x divide-stone-400   transition-all duration-300 ease-in-out hover:bg-bellsBlue hover:text-white ${index % 2 ? "bg-tableEven" : "bg-tableOdd"}`}
@@ -42,7 +47,7 @@ function AssignmentsPage() {
                 <span className="text-xs">[click to view]</span>
               </td>
 
-              <td className="py-3 text-sm">
+              <td className="py-3 text-xs">
                 {FormatTime(assignment.created_at)}
               </td>
             </tr>

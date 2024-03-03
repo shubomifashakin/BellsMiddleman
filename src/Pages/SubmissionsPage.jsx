@@ -12,7 +12,12 @@ import { Button } from "../Components/Button";
 import { FaFilePdf } from "react-icons/fa";
 import { IoMdCloseCircle } from "react-icons/io";
 
-import { DownloadFile, UploadAssignment } from "../Actions/SupabaseActions";
+import {
+  DownloadFile,
+  FileExists,
+  GetStudentsData,
+  UploadAssignment,
+} from "../Actions/SupabaseActions";
 
 function SubmissionsPage() {
   const [submitting, setSubmitting] = useState(false);
@@ -21,7 +26,11 @@ function SubmissionsPage() {
 
   const fileRef = useRef(null);
 
-  const [{ college, matric_no, dept }] = useLoaderData();
+  const { studentsData, hasSubmitted } = useLoaderData();
+  const [{ college, matric_no, dept }] = studentsData;
+
+  const submitStatus = hasSubmitted.length ? true : false;
+
   const { code, assName } = useParams();
   const navigate = useNavigate();
 
@@ -161,11 +170,15 @@ function SubmissionsPage() {
         </li>
       </Navbar>
 
-      <main className="row-span-2 flex flex-col  space-y-4 p-4 lg:px-6 lg:py-4">
-        <DownloadAssignment handleDownload={handleDownload} />
+      <main className="row-span-2 flex h-full flex-col  space-y-4 bg-primaryBgColor p-4 lg:px-6 lg:py-4">
+        <div className="flex items-center justify-between">
+          <DownloadAssignment handleDownload={handleDownload} />
+
+          <Status status={submitStatus} />
+        </div>
 
         <form onSubmit={handleSubmit} className="h-full space-y-6 rounded-sm ">
-          <h2 className=" rounded-t bg-bellsBlue p-2 text-base font-semibold capitalize text-white">
+          <h2 className=" cursor-default rounded-t bg-bellsBlue p-2 text-base font-semibold capitalize text-white">
             Submit {assName} for {code}
           </h2>
 
@@ -205,7 +218,7 @@ function SubmissionsPage() {
           <InputGroup label={"Assignment"}>
             <input
               type="file"
-              className="hidden"
+              className="lg:hidden"
               accept=".pdf"
               ref={fileRef}
               onChange={storeSelectedFile}
@@ -215,7 +228,7 @@ function SubmissionsPage() {
               onDragEnter={handleDragEnter}
               onDragLeave={handleDrageLeave}
               onDrop={handleDrop}
-              className={`relative cursor-pointer rounded-sm transition-all duration-300 ease-in-out ${file ? "" : "hover:bg-hoverText"} ${dragging ? "bg-hoverText " : " border border-dashed border-stone-400"} flex  flex-col items-center space-y-1 py-2 text-center text-black lg:py-4`}
+              className={`relative hidden cursor-pointer rounded-sm transition-all duration-300 ease-in-out lg:flex ${file ? "" : "hover:bg-hoverText"} ${dragging ? "bg-hoverText " : " border border-dashed border-stone-400"} flex  flex-col items-center space-y-1 py-2 text-center text-black lg:py-4`}
               onClick={triggerFile}
             >
               {file ? (
@@ -240,13 +253,23 @@ function SubmissionsPage() {
           </InputGroup>
 
           <Button
-            disabled={submitting}
-            label={"Submit Assignment"}
+            disabled={submitting || submitStatus}
+            label={`Submit ${assName}`}
             type="full"
           />
         </form>
       </main>
     </>
+  );
+}
+
+function Status({ status }) {
+  return (
+    <p
+      className={`cursor-default rounded-sm p-1 text-sm font-semibold text-white ${status ? "bg-green-700" : "bg-red-700"}`}
+    >
+      {status ? "Submitted" : "Pending"}
+    </p>
   );
 }
 
@@ -264,3 +287,22 @@ function DownloadAssignment({ handleDownload }) {
 }
 
 export default SubmissionsPage;
+
+export async function SubmissionsLoader({ params }) {
+  const { code, assName } = params;
+
+  const studentsData = await GetStudentsData();
+
+  const [{ college, matric_no, dept }] = studentsData;
+
+  const fileName = `${matric_no.replaceAll("/", "-")}-${college}-${dept}`;
+
+  const filePath = `${code}/assignments/submissions/${assName}`;
+
+  const hasSubmitted = await FileExists({
+    fileName,
+    filePath,
+  });
+
+  return { studentsData, hasSubmitted };
+}
