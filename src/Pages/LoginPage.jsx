@@ -145,7 +145,7 @@ function Step2Reducer(state, { label, payload }) {
       return { ...state, errorFetching: true, loadingColleges: false };
 
     case "colleges":
-      return { ...state, allColleges: payload, loading: false };
+      return { ...state, allColleges: payload, loadingColleges: false };
 
     case "depts":
       return { ...state, allDepts: payload };
