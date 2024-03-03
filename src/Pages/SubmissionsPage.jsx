@@ -258,7 +258,7 @@ function DownloadAssignment({ handleDownload }) {
       className="flex cursor-pointer items-center gap-1 self-start text-sm font-semibold underline transition-colors duration-300 ease-in-out hover:text-hoverText"
       onClick={() => handleDownload(assName)}
     >
-      Download Assignment <FaFilePdf />
+      Download {assName} <FaFilePdf />
     </p>
   );
 }
