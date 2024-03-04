@@ -54,7 +54,7 @@ export async function GetColleges() {
 
 export async function ResetPassword(email) {
   let { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: "http://localhost:5173/updatePassword",
+    redirectTo: "https://student-bellscommsportal.netlify.app/updatePassword",
   });
 
   if (error?.message) throw error;

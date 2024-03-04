@@ -44,40 +44,50 @@ function NotesPage() {
   }
 
   return (
-    <table
-      className={`w-full divide-y  divide-stone-400 overflow-hidden border border-stone-400 p-4 text-center `}
-    >
-      <thead className=" bg-bellsBlue text-white">
-        <tr className="divide-x divide-stone-400">
-          <th className="py-3.5 text-sm lg:text-base">S/N</th>
+    <>
+      {allNotes.length ? (
+        <table
+          className={`w-full divide-y  divide-stone-400 overflow-hidden border border-stone-400 p-4 text-center `}
+        >
+          <thead className=" bg-bellsBlue text-white">
+            <tr className="divide-x divide-stone-400">
+              <th className="py-3.5 text-sm lg:text-base">S/N</th>
 
-          <th className="py-3.5 text-sm lg:text-base">Title</th>
+              <th className="py-3.5 text-sm lg:text-base">Title</th>
 
-          <th className="py-3.5 text-sm lg:text-base">Uploaded</th>
-        </tr>
-      </thead>
-
-      <tbody className="divide-y divide-stone-400">
-        {sortedNotes.map((note, index) => {
-          return (
-            <tr
-              className={`cursor-pointer divide-x divide-stone-400   transition-all duration-300 ease-in-out hover:bg-bellsBlue hover:text-white ${index % 2 ? "bg-tableEven" : "bg-tableOdd"}`}
-              onClick={() => handleDownload(note.name)}
-              key={index}
-            >
-              <td className="py-3">{index + 1}</td>
-
-              <td className="py-3">
-                {note.name.split(".")[0]} &nbsp;
-                <span className="text-xs">[click to download]</span>
-              </td>
-
-              <td className="py-3 text-xs">{FormatTime(note.created_at)}</td>
+              <th className="py-3.5 text-sm lg:text-base">Uploaded</th>
             </tr>
-          );
-        })}
-      </tbody>
-    </table>
+          </thead>
+
+          <tbody className="divide-y divide-stone-400">
+            {sortedNotes.map((note, index) => {
+              return (
+                <tr
+                  className={`cursor-pointer divide-x divide-stone-400   transition-all duration-300 ease-in-out hover:bg-bellsBlue hover:text-white ${index % 2 ? "bg-tableEven" : "bg-tableOdd"}`}
+                  onClick={() => handleDownload(note.name)}
+                  key={index}
+                >
+                  <td className="py-3">{index + 1}</td>
+
+                  <td className="py-3">
+                    {note.name.split(".")[0]} &nbsp;
+                    <span className="text-xs">[click to download]</span>
+                  </td>
+
+                  <td className="py-3 text-xs">
+                    {FormatTime(note.created_at)}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      ) : (
+        <h2 className="rounded-sm bg-bellsBlue p-2 capitalize text-white ">
+          No Notes have been given
+        </h2>
+      )}
+    </>
   );
 }
 
