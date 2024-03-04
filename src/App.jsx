@@ -22,7 +22,14 @@ import ErrorElement from "./Components/ErrorElement";
 const router = createBrowserRouter([
   { path: "/", element: <LoginPage /> },
   { path: "forgotPassword", element: <ForgotPassswordPage /> },
-  { path: "updatePassword", element: <UpdatePasswordPage /> },
+  {
+    path: "updatePassword",
+    element: (
+      <ProtectedRoute>
+        <UpdatePasswordPage />
+      </ProtectedRoute>
+    ),
+  },
 
   {
     element: <Layout />,
@@ -57,7 +64,11 @@ const router = createBrowserRouter([
         path: "submissions/:code/:assName",
         loader: SubmissionsLoader,
         errorElement: <ErrorElement />,
-        element: <SubmissionsPage />,
+        element: (
+          <ProtectedRoute>
+            <SubmissionsPage />
+          </ProtectedRoute>
+        ),
       },
     ],
   },

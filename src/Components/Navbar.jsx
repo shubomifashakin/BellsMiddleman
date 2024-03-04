@@ -32,7 +32,6 @@ export function Navbar({ children }) {
           <Button
             label={"Log Out"}
             action={handleSignOut}
-            fontSize="sm"
             bg={false}
             type="text"
           ></Button>

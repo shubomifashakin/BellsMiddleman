@@ -1,7 +1,10 @@
-import { GetStudentsData } from "../Actions/SupabaseActions";
 import { useLoaderData, useNavigate } from "react-router";
-import { sortArrayBasedOnLetters } from "../Actions/HelperActions";
+
+import { GetStudentsData } from "../Actions/SupabaseActions";
+
 import { Navbar } from "../Components/Navbar";
+
+import { sortArrayBasedOnLetters } from "../Actions/HelperActions";
 
 function HomePage() {
   const { courses, matric_no, college, dept } = useLoaderData();
@@ -65,7 +68,7 @@ function HomePage() {
 
 export async function HomeLoader() {
   const studData = await GetStudentsData();
-  return studData[0];
+  return studData[0] ? studData[0] : null;
 }
 
 export default HomePage;
