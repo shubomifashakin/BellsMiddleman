@@ -16,7 +16,7 @@ import toast from "react-hot-toast";
 import { IoIosAddCircle, IoIosCloseCircle } from "react-icons/io";
 
 import { CheckBox } from "../Components/CheckBox";
-import { InputGroup } from "../Components/InputGroup";
+import { InputError, InputGroup } from "../Components/InputGroup";
 import { Button } from "../Components/Button";
 
 import {
@@ -270,7 +270,7 @@ function LoginInForm() {
       <form className="block space-y-6" onSubmit={handleSubmit(handleLogin)}>
         <InputGroup label={"Email"}>
           {errors?.email?.message ? (
-            <p className="text-xs text-red-600">{errors?.email?.message}</p>
+            <InputError errorMessage={errors?.email?.message} />
           ) : null}
 
           <input
@@ -287,7 +287,7 @@ function LoginInForm() {
 
         <InputGroup label={"Password"}>
           {errors?.password?.message ? (
-            <p className="text-xs text-red-600">{errors?.password?.message}</p>
+            <InputError errorMessage={errors?.password?.message} />
           ) : null}
 
           <input
@@ -483,9 +483,7 @@ function Step1Form() {
       onSubmit={handleSubmit}
     >
       <InputGroup label={"Email"}>
-        {emailError ? (
-          <p className="text-xs text-red-600">{emailError}</p>
-        ) : null}
+        {emailError ? <InputError errorMessage={emailError} /> : null}
 
         <input
           ref={emailRef}
@@ -499,9 +497,7 @@ function Step1Form() {
       </InputGroup>
 
       <InputGroup label={"Password"}>
-        {passwordError ? (
-          <p className="text-xs  text-red-600">{passwordError}</p>
-        ) : null}
+        {passwordError ? <InputError errorMessage={passwordError} /> : null}
 
         <input
           ref={passwordRef}
@@ -515,7 +511,7 @@ function Step1Form() {
       </InputGroup>
 
       <InputGroup label={"Re-type Password"}>
-        {valError ? <p className="text-xs  text-red-600">{valError}</p> : null}
+        {valError ? <InputError errorMessage={valError} /> : null}
 
         <input
           ref={valRef}
@@ -653,9 +649,7 @@ function Step2Form() {
       onSubmit={handleSubmit}
     >
       <InputGroup label={"Matric Number"}>
-        {errorMatric ? (
-          <p className="text-xs text-red-600">{errorMatric}</p>
-        ) : null}
+        {errorMatric ? <InputError errorMessage={errorMatric} /> : null}
 
         <input
           ref={matricRef}
@@ -682,7 +676,7 @@ function Step2Form() {
           </p>
         ) : null}
 
-        {errorColl ? <p className="text-xs text-red-600">{errorColl}</p> : null}
+        {errorColl ? <InputError errorMessage={errorColl} /> : null}
 
         <select
           ref={collegeRef}
@@ -707,9 +701,7 @@ function Step2Form() {
       {/*show the selection input if the user has selected a college && all the departments for that college have been fetched */}
       {allDepts.length ? (
         <InputGroup label={"Department"}>
-          {errorDept ? (
-            <p className="text-xs text-red-600">{errorDept}</p>
-          ) : null}
+          {errorDept ? <InputError errorMessage={errorDept} /> : null}
 
           <select
             ref={deptRef}

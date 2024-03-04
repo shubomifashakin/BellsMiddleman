@@ -95,7 +95,7 @@ function SubmissionsPage() {
 
       setSubmitting(false);
 
-      toast.success("Assignment Submitted");
+      toast.success(`${assName} Submitted`);
 
       navigate(`/${code}/assignments`);
     } catch (err) {
@@ -183,7 +183,10 @@ function SubmissionsPage() {
           />
         </div>
 
-        <form onSubmit={handleSubmit} className="h-full space-y-6 rounded-sm ">
+        <form
+          onSubmit={handleSubmit}
+          className="h-full space-y-6 overflow-y-auto rounded-sm  p-0.5"
+        >
           <h2 className=" cursor-default rounded-t bg-bellsBlue p-2 text-base font-semibold capitalize text-white">
             Submit {assName} for {code}
           </h2>

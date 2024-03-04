@@ -4,7 +4,7 @@ import Lottie from "lottie-react";
 import ForgotLottie from "../assets/forgotPasswordLottie.json";
 import { ResetPassword } from "../Actions/SupabaseActions";
 import toast from "react-hot-toast";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { InputGroup } from "../Components/InputGroup";
 import { Button } from "../Components/Button";
 
@@ -12,12 +12,17 @@ function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const lottieRef = useRef(null);
 
+  const navigate = useNavigate();
+
   async function handleReset(e) {
     e.preventDefault();
     if (!email) return;
     try {
       await ResetPassword(email);
+
       toast.success(`An reset link has been sent to ${email}`);
+
+      navigate("/");
     } catch (err) {
       toast.error(err.message);
     }

@@ -9,3 +9,7 @@ export function InputGroup({ label, children }) {
     </div>
   );
 }
+
+export function InputError({ errorMessage }) {
+  return <p className="text-xs text-red-600">{errorMessage}</p>;
+}

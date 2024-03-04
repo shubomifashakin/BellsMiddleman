@@ -16,16 +16,21 @@ import SubmissionsPage, { SubmissionsLoader } from "./Pages/SubmissionsPage";
 
 import Layout from "./Components/Layout";
 import ProtectedRoute from "./Components/ProtectedRoute";
+import UpdatePasswordPage from "./Pages/UpdatePasswordPage";
+import ErrorElement from "./Components/ErrorElement";
 
 const router = createBrowserRouter([
   { path: "/", element: <LoginPage /> },
   { path: "forgotPassword", element: <ForgotPassswordPage /> },
+  { path: "updatePassword", element: <UpdatePasswordPage /> },
+
   {
     element: <Layout />,
     children: [
       {
         path: "home",
         loader: HomeLoader,
+        errorElement: <ErrorElement />,
         element: (
           <ProtectedRoute>
             <HomePage />
@@ -36,6 +41,7 @@ const router = createBrowserRouter([
         path: "/:code",
         loader: CourseLoader,
         id: "courseData",
+        errorElement: <ErrorElement />,
         element: (
           <ProtectedRoute>
             <CoursePage />
@@ -50,6 +56,7 @@ const router = createBrowserRouter([
       {
         path: "submissions/:code/:assName",
         loader: SubmissionsLoader,
+        errorElement: <ErrorElement />,
         element: <SubmissionsPage />,
       },
     ],

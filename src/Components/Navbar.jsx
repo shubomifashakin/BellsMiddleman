@@ -1,8 +1,10 @@
 import { useNavigate } from "react-router";
-import { LogOutFn } from "../Actions/SupabaseActions";
 
 import { Button } from "./Button";
 import { CourseNavLink } from "./Navlink";
+
+import { LogOutFn } from "../Actions/SupabaseActions";
+import toast from "react-hot-toast";
 
 export function Navbar({ children }) {
   const navigate = useNavigate();
@@ -12,7 +14,7 @@ export function Navbar({ children }) {
       await LogOutFn();
       navigate("/");
     } catch (err) {
-      console.log(err);
+      toast.error(err.message);
     }
   }
 
@@ -44,6 +46,10 @@ export function Navbar({ children }) {
         </li>
 
         {children}
+
+        <li>
+          <CourseNavLink path={"/updatePassword"} label={"Change Password"} />
+        </li>
 
         <li>
           <Button
