@@ -26,7 +26,7 @@ export default {
         hoverBellsBlue: "#0E3B43",
         tableEven: "#d2e9fb",
         tableOdd: "#eaf5fd",
-        hoverText: "#FCFC62",
+        hoverYellow: "#FCFC62",
       },
     },
   },

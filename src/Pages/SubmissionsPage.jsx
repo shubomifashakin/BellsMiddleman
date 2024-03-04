@@ -242,7 +242,7 @@ function SubmissionsPage() {
             >
               {file ? (
                 <IoMdCloseCircle
-                  className="absolute right-2.5 top-2.5 text-lg hover:text-hoverText"
+                  className="hover:text-hoverYellow absolute right-2.5 top-2.5 text-lg"
                   onClick={removeFile}
                 />
               ) : null}
@@ -281,7 +281,7 @@ function Status({ status, studentsData, handleDownload }) {
   return (
     <p
       onClick={status ? () => handleDownload(filePath, true) : null}
-      className={`cursor-default rounded-sm p-1 text-sm font-semibold text-white transition-colors duration-300 ease-in-out ${status ? "cursor-pointer bg-green-700  hover:text-hoverText " : "bg-red-700"}`}
+      className={`cursor-default rounded-sm p-1 text-sm font-semibold text-white transition-colors duration-300 ease-in-out ${status ? "hover:text-hoverYellow cursor-pointer  bg-green-700 " : "bg-red-700"}`}
     >
       {status ? "Submitted" : "Pending"}
     </p>
@@ -293,7 +293,7 @@ function DownloadAssignment({ handleDownload }) {
 
   return (
     <p
-      className="flex cursor-pointer items-center gap-1 self-start text-sm font-semibold underline transition-colors duration-300 ease-in-out hover:text-hoverText"
+      className="hover:text-hoverYellow flex cursor-pointer items-center gap-1 self-start text-sm font-semibold underline transition-colors duration-300 ease-in-out"
       onClick={() => handleDownload(assName)}
     >
       Download {assName} <FaFilePdf />
