@@ -112,12 +112,14 @@ function SubmissionsPage() {
     return;
   }
 
-  async function handleDownload(filename) {
+  async function handleDownload(filename, submission = false) {
     try {
+      //if we want the assignment itself, download the assignment, if not download what we submitted
+
       // Fetch the PDF file content
-      const pdfBlob = await DownloadFile(
-        `${code}/assignments/uploads/${filename}`,
-      );
+      const pdfBlob = !submission
+        ? await DownloadFile(`${code}/assignments/uploads/${filename}`)
+        : await DownloadFile(`${code}/assignments/submissions/${filename}`);
 
       // Create a Blob URL from the Blob
       const pdfUrl = URL.createObjectURL(pdfBlob);
@@ -174,7 +176,11 @@ function SubmissionsPage() {
         <div className="flex items-center justify-between">
           <DownloadAssignment handleDownload={handleDownload} />
 
-          <Status status={submitStatus} />
+          <Status
+            status={submitStatus}
+            studentsData={studentsData}
+            handleDownload={handleDownload}
+          />
         </div>
 
         <form onSubmit={handleSubmit} className="h-full space-y-6 rounded-sm ">
@@ -263,10 +269,16 @@ function SubmissionsPage() {
   );
 }
 
-function Status({ status }) {
+function Status({ status, studentsData, handleDownload }) {
+  const { assName } = useParams();
+  const [{ matric_no, college, dept }] = studentsData;
+
+  const filePath = `${assName}/${matric_no.replaceAll("/", "-")}-${college}-${dept}`;
+
   return (
     <p
-      className={`cursor-default rounded-sm p-1 text-sm font-semibold text-white ${status ? "bg-green-700" : "bg-red-700"}`}
+      onClick={status ? () => handleDownload(filePath, true) : null}
+      className={`cursor-default rounded-sm p-1 text-sm font-semibold text-white transition-colors duration-300 ease-in-out ${status ? "cursor-pointer bg-green-700  hover:text-hoverText " : "bg-red-700"}`}
     >
       {status ? "Submitted" : "Pending"}
     </p>
