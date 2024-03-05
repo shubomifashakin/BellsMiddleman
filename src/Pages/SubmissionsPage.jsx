@@ -10,9 +10,7 @@ import { InputGroup } from "../Components/InputGroup";
 import { Button } from "../Components/Button";
 import LoadingScreen from "../Components/LoadingScreen";
 
-import { IoCloudUploadOutline } from "react-icons/io5";
-import { MdOutlinePendingActions } from "react-icons/md";
-
+import { MdCloudUpload, MdOutlinePendingActions } from "react-icons/md";
 import { FaFilePdf } from "react-icons/fa";
 import { IoMdCloseCircle } from "react-icons/io";
 
@@ -290,7 +288,11 @@ function Status({ status, studentsData, handleDownload }) {
       className={`flex cursor-default items-center gap-2 rounded-sm p-1 text-sm font-semibold text-white transition-colors duration-300 ease-in-out ${status ? "cursor-pointer bg-green-700  hover:text-hoverYellow " : "bg-red-700"}`}
     >
       {status ? "Submitted " : "Pending"}{" "}
-      {status ? <IoCloudUploadOutline /> : <MdOutlinePendingActions />}
+      {status ? (
+        <MdCloudUpload className="text-lg" />
+      ) : (
+        <MdOutlinePendingActions className="text-lg" />
+      )}
     </p>
   );
 }
