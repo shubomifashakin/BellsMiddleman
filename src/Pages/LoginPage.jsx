@@ -31,7 +31,7 @@ import {
   invalidPassword,
   passwordEmpty,
   passwordsNotMatch,
-  sortArrayBasedOnLetters,
+  SortArrayBasedOnLetters,
   valEmpty,
 } from "../Actions/HelperActions";
 
@@ -550,7 +550,7 @@ function Step2Form() {
   const collegeRef = useRef(null);
   const deptRef = useRef(null);
 
-  const sortedDepts = sortArrayBasedOnLetters(allDepts);
+  const sortedDepts = SortArrayBasedOnLetters(allDepts);
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -741,7 +741,7 @@ function Step3Form() {
     initialStep3State,
   );
 
-  const orderedSelectedCourses = sortArrayBasedOnLetters(selectedCourses);
+  const orderedSelectedCourses = SortArrayBasedOnLetters(selectedCourses);
   const searchRef = useRef(null);
 
   function addCourse(e, course) {

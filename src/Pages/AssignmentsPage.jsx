@@ -1,5 +1,6 @@
 import { useNavigate, useParams, useRouteLoaderData } from "react-router";
 import { FormatTime } from "../Actions/HelperActions";
+import NoNotesOrAss from "../Components/NoNotesOrAss";
 
 function AssignmentsPage() {
   const { assignments } = useRouteLoaderData("courseData");
@@ -61,9 +62,7 @@ function AssignmentsPage() {
           </tbody>
         </table>
       ) : (
-        <h2 className="rounded-sm bg-bellsBlue p-2  capitalize text-white ">
-          No assignments have been given
-        </h2>
+        <NoNotesOrAss label={"Assignments"} />
       )}
     </>
   );

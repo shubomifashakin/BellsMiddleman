@@ -2,11 +2,13 @@ import { useParams, useRouteLoaderData } from "react-router";
 
 import toast from "react-hot-toast";
 
+import NoNotesOrAss from "../Components/NoNotesOrAss";
+
 import { DownloadFile } from "../Actions/SupabaseActions";
 
 import {
   FormatTime,
-  sortArrayBasedOnCreatedAt,
+  SortArrayBasedOnCreatedAt,
 } from "../Actions/HelperActions";
 
 function NotesPage() {
@@ -15,7 +17,7 @@ function NotesPage() {
   //removes supabase placeholder file from array
   const allNotes = notes.filter((c) => c.name !== ".emptyFolderPlaceholder");
 
-  const sortedNotes = sortArrayBasedOnCreatedAt(allNotes);
+  const sortedNotes = SortArrayBasedOnCreatedAt(allNotes);
 
   const { code } = useParams();
 
@@ -83,9 +85,7 @@ function NotesPage() {
           </tbody>
         </table>
       ) : (
-        <h2 className="rounded-sm bg-bellsBlue p-2 capitalize text-white ">
-          No Notes have been given
-        </h2>
+        <NoNotesOrAss label={"Notes"} />
       )}
     </>
   );

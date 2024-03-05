@@ -1,15 +1,14 @@
-import { useLocation, useNavigate, useRouteError } from "react-router";
+import { useNavigate, useRouteError } from "react-router";
 
 import { Button } from "./Button";
 
 function ErrorElement() {
   const { code, details, message, hint } = useRouteError();
-  const { pathname } = useLocation();
 
   const navigate = useNavigate();
 
   function tryAgain() {
-    navigate(pathname);
+    navigate("/");
   }
 
   return (
@@ -18,6 +17,7 @@ function ErrorElement() {
 
       <p className="text-sm">
         {code && code + ":"}
+
         {message || details}
       </p>
 

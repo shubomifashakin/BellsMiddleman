@@ -5,7 +5,7 @@ export const invalidPassword =
   "Must contain uppercase & lowercase letters and a number";
 export const passwordsNotMatch = "Passwords do not match";
 
-export function sortArrayBasedOnLetters(arr) {
+export function SortArrayBasedOnLetters(arr) {
   return arr.sort((a, b) => {
     // Convert both strings to lowercase to ensure case-insensitive sorting
     let stringA = a.toLowerCase();
@@ -21,7 +21,7 @@ export function sortArrayBasedOnLetters(arr) {
   });
 }
 
-export function sortArrayBasedOnCreatedAt(arr) {
+export function SortArrayBasedOnCreatedAt(arr) {
   return arr.sort((a, b) => {
     // Convert the 'created_at' strings to Date objects for comparison
     const dateA = new Date(a.created_at);

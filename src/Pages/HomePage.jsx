@@ -4,14 +4,14 @@ import { GetStudentsData } from "../Actions/SupabaseActions";
 
 import { Navbar } from "../Components/Navbar";
 
-import { sortArrayBasedOnLetters } from "../Actions/HelperActions";
+import { SortArrayBasedOnLetters } from "../Actions/HelperActions";
 
 function HomePage() {
   const { courses, matric_no, college, dept } = useLoaderData();
 
   const navigate = useNavigate();
 
-  const courses2 = sortArrayBasedOnLetters(JSON.parse(courses));
+  const courses2 = SortArrayBasedOnLetters(JSON.parse(courses));
 
   return (
     <>

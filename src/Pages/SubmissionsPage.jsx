@@ -8,6 +8,7 @@ import { Navbar } from "../Components/Navbar";
 import { CourseNavLink } from "../Components/Navlink";
 import { InputGroup } from "../Components/InputGroup";
 import { Button } from "../Components/Button";
+import LoadingScreen from "../Components/LoadingScreen";
 
 import { FaFilePdf } from "react-icons/fa";
 import { IoMdCloseCircle } from "react-icons/io";
@@ -171,6 +172,8 @@ function SubmissionsPage() {
           />
         </li>
       </Navbar>
+
+      {submitting ? <LoadingScreen /> : null}
 
       <main className="row-span-2 flex h-full flex-col  space-y-4 bg-primaryBgColor p-4 lg:px-6 lg:py-4">
         <div className="flex items-center justify-between">
