@@ -2,6 +2,8 @@ import { useParams, useRouteLoaderData } from "react-router";
 
 import toast from "react-hot-toast";
 
+import { IoCloudDownloadOutline } from "react-icons/io5";
+
 import NoNotesOrAss from "../Components/NoNotesOrAss";
 
 import { DownloadFile } from "../Actions/SupabaseActions";
@@ -71,9 +73,16 @@ function NotesPage() {
                 >
                   <td className="py-3">{index + 1}</td>
 
-                  <td className="py-3">
+                  <td className="hidden py-3 lg:block">
                     {note.name.split(".")[0]} &nbsp;
                     <span className="text-xs">[click to download]</span>
+                  </td>
+
+                  <td className="flex items-center justify-center py-3 lg:hidden">
+                    {note.name.split(".")[0]} &nbsp;
+                    <span className="text-base">
+                      <IoCloudDownloadOutline />
+                    </span>
                   </td>
 
                   <td className="py-3 text-xs">

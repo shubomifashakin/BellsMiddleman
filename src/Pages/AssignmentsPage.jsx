@@ -1,4 +1,7 @@
 import { useNavigate, useParams, useRouteLoaderData } from "react-router";
+
+import { FaEye } from "react-icons/fa";
+
 import { FormatTime } from "../Actions/HelperActions";
 import NoNotesOrAss from "../Components/NoNotesOrAss";
 
@@ -48,9 +51,16 @@ function AssignmentsPage() {
                 >
                   <td className="py-3">{index + 1}</td>
 
-                  <td className="py-3">
+                  <td className="hidden py-3 lg:block">
                     {assignment.name} &nbsp;
                     <span className="text-xs">[click to view]</span>
+                  </td>
+
+                  <td className="flex items-center justify-center py-3 lg:hidden">
+                    {assignment.name} &nbsp;
+                    <span className="text-base">
+                      <FaEye />
+                    </span>
                   </td>
 
                   <td className="py-3 text-xs">

@@ -10,6 +10,9 @@ import { InputGroup } from "../Components/InputGroup";
 import { Button } from "../Components/Button";
 import LoadingScreen from "../Components/LoadingScreen";
 
+import { IoCloudUploadOutline } from "react-icons/io5";
+import { MdOutlinePendingActions } from "react-icons/md";
+
 import { FaFilePdf } from "react-icons/fa";
 import { IoMdCloseCircle } from "react-icons/io";
 
@@ -284,9 +287,10 @@ function Status({ status, studentsData, handleDownload }) {
   return (
     <p
       onClick={status ? () => handleDownload(filePath, true) : null}
-      className={`cursor-default rounded-sm p-1 text-sm font-semibold text-white transition-colors duration-300 ease-in-out ${status ? "cursor-pointer bg-green-700  hover:text-hoverYellow " : "bg-red-700"}`}
+      className={`flex cursor-default items-center gap-2 rounded-sm p-1 text-sm font-semibold text-white transition-colors duration-300 ease-in-out ${status ? "cursor-pointer bg-green-700  hover:text-hoverYellow " : "bg-red-700"}`}
     >
-      {status ? "Submitted" : "Pending"}
+      {status ? "Submitted " : "Pending"}{" "}
+      {status ? <IoCloudUploadOutline /> : <MdOutlinePendingActions />}
     </p>
   );
 }
@@ -296,7 +300,7 @@ function DownloadAssignment({ handleDownload }) {
 
   return (
     <p
-      className="flex cursor-pointer items-center gap-1 self-start text-sm font-semibold underline transition-colors duration-300 ease-in-out hover:text-hoverYellow"
+      className="flex cursor-pointer items-center gap-0.5 self-start text-sm font-semibold underline transition-colors duration-300 ease-in-out hover:text-hoverYellow"
       onClick={() => handleDownload(assName)}
     >
       Download {assName} <FaFilePdf />

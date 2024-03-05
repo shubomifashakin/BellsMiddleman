@@ -1,5 +1,7 @@
 import { useLoaderData, useNavigate } from "react-router";
 
+import { FaEye } from "react-icons/fa";
+
 import { GetStudentsData } from "../Actions/SupabaseActions";
 
 import { Navbar } from "../Components/Navbar";
@@ -54,7 +56,18 @@ function HomePage() {
                     key={index}
                   >
                     <td className="py-3">{index + 1}</td>
-                    <td className="py-3">{course}</td>
+
+                    <td className="hidden py-3 lg:block">
+                      {course}&nbsp;
+                      <span className="text-xs">[click to view]</span>
+                    </td>
+
+                    <td className="flex items-center justify-center py-3 lg:hidden">
+                      {course} &nbsp;
+                      <span className="text-base">
+                        <FaEye />
+                      </span>
+                    </td>
                   </tr>
                 );
               })}
