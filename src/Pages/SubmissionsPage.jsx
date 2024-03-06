@@ -267,7 +267,7 @@ function SubmissionsPage() {
 
           <Button
             disabled={submitting || submitStatus}
-            label={`Submit ${assName}`}
+            label={!submitStatus ? `Submit ${assName}` : "Submitted"}
             type="full"
           />
         </form>

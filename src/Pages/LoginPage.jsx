@@ -20,6 +20,7 @@ import { InputError, InputGroup } from "../Components/InputGroup";
 import { Button } from "../Components/Button";
 
 import {
+  CheckRole,
   FindCourse,
   GetColleges,
   LogInUser,
@@ -255,12 +256,25 @@ function LoginInForm() {
 
     try {
       setSubmitting(true);
+
+      //logs in the user
       await LogInUser(email, password);
+
+      //gets the role of the user
+      const [{ role }] = await CheckRole();
+
+      //checks if the users role is student
+      if (role !== "student") {
+        throw new Error("You are not a student");
+      }
+
       setSubmitting(false);
+
       navigate("home");
     } catch (err) {
-      setSubmitting(false);
       toast.error(err.message);
+      localStorage.removeItem("sb-xqpgunhudqrnqtfkbiwg-auth-token");
+      setSubmitting(false);
     }
   }
 

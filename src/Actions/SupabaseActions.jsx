@@ -12,6 +12,7 @@ export async function SignUpUser(details) {
         college,
         matricNo,
         dept,
+        role: "student",
       },
     },
   });
@@ -20,12 +21,24 @@ export async function SignUpUser(details) {
 }
 
 export async function LogInUser(email, password) {
-  let { error } = await supabase.auth.signInWithPassword({
+  let { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
 
   if (error?.message) throw error;
+
+  return data;
+}
+
+export async function CheckRole() {
+  let { data: user_roles, error } = await supabase
+    .from("user_roles")
+    .select("role");
+
+  if (error?.message) throw error;
+
+  return user_roles;
 }
 
 export async function FindCourse(course, abortSignal) {
