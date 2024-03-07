@@ -906,12 +906,12 @@ function BottomLinks({ checked }) {
   return (
     <div className="flex flex-col items-center justify-center space-y-2">
       <p className="text-center text-xs">
-        Are you a lecturer? Visit &nbsp;
+        Are you a lecturer? &nbsp;
         <a
-          href="#"
+          href="https://lecturer-bellscommsportal.netlify.app/"
           className="underline transition-colors duration-300 ease-in-out hover:text-hoverBellsBlue"
         >
-          www.lecturer.com
+          Visit Here
         </a>
       </p>
 
