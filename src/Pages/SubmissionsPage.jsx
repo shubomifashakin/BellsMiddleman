@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 import { useLoaderData, useNavigate, useParams } from "react-router";
 
@@ -10,9 +10,7 @@ import { InputGroup } from "../Components/InputGroup";
 import { Button } from "../Components/Button";
 import LoadingScreen from "../Components/LoadingScreen";
 
-import { MdCloudUpload, MdOutlinePendingActions } from "react-icons/md";
 import { FaFilePdf } from "react-icons/fa";
-import { IoMdCloseCircle } from "react-icons/io";
 
 import {
   DownloadFile,
@@ -21,62 +19,48 @@ import {
   UploadAssignment,
 } from "../Actions/SupabaseActions";
 
+import { DragDrop } from "../Components/DragDrop";
+
 function SubmissionsPage() {
   const [submitting, setSubmitting] = useState(false);
-  const [dragging, setDragging] = useState(false);
   const [file, setFile] = useState("");
 
   const fileRef = useRef(null);
 
-  const { studentsData, hasSubmitted } = useLoaderData();
+  //data fetched from loader
+  const { studentsData, hasSubmitted: foundSubmitted } = useLoaderData();
   const [{ college, matric_no, dept }] = studentsData;
 
-  const submitStatus = hasSubmitted.length ? true : false;
+  //checks if the student has submitted, if there is a file, then student has submitted
+  const hasSubmitted = foundSubmitted.length ? true : false;
 
-  const { code, assName } = useParams();
+  const { code, assFileName } = useParams();
+
+  //extract the assignment name from the params
+  const assignmentName = assFileName.split("-")[0];
+
+  //extract the due date from the params & check if student can still submit
+  const dueDate = assFileName.split("-")[1];
+  const isOpen = new Date(dueDate) > new Date();
+
   const navigate = useNavigate();
-
-  function handleDragEnter() {
-    setDragging(true);
-  }
-
-  function handleDrageLeave() {
-    setDragging(false);
-  }
-
-  function handleDrop(e) {
-    e.preventDefault();
-    const selectedFile = e.dataTransfer.files[0];
-
-    setDragging(false);
-    setFile(selectedFile);
-  }
-
-  function triggerFile() {
-    fileRef.current.click();
-  }
 
   function storeSelectedFile(e) {
     const selectedFile = e.target.files[0];
     setFile(selectedFile);
   }
 
-  function removeFile(e) {
-    e.stopPropagation();
-    setFile(null);
-  }
-
   async function handleSubmit(e) {
     e.preventDefault();
+
+    //if it is still submitting, prevent another submission
+    if (submitting) return;
 
     if (!file) {
       toast.error("Please select a file to submit");
       fileRef.current.focus();
       return;
     }
-
-    //if it is still submitting, prevent another submission
-    if (submitting) return;
 
     //if not, continue submitting
     if (!submitting) {
@@ -89,7 +73,7 @@ function SubmissionsPage() {
       matric_no,
       dept,
       file,
-      assName,
+      assName: assignmentName,
     };
 
     try {
@@ -97,7 +81,7 @@ function SubmissionsPage() {
 
       setSubmitting(false);
 
-      toast.success(`${assName} Submitted`);
+      toast.success(`${assignmentName} Submitted`);
 
       navigate(`/${code}/assignments`);
     } catch (err) {
@@ -114,14 +98,13 @@ function SubmissionsPage() {
     return;
   }
 
-  async function handleDownload(filename, submission = false) {
+  async function handleDownload(filename, studSubmission = false) {
     try {
-      //if we want the assignment itself, download the assignment, if not download what we submitted
+      //if we want the assignment itself, download the assignment, if not download what student submitted
 
-      // Fetch the PDF file content
-      const pdfBlob = !submission
-        ? await DownloadFile(`${code}/assignments/uploads/${filename}`)
-        : await DownloadFile(`${code}/assignments/submissions/${filename}`);
+      const pdfBlob = studSubmission
+        ? await DownloadFile(`${code}/assignments/submissions/${filename}`)
+        : await DownloadFile(`${code}/assignments/uploads/${filename}`);
 
       // Create a Blob URL from the Blob
       const pdfUrl = URL.createObjectURL(pdfBlob);
@@ -142,23 +125,6 @@ function SubmissionsPage() {
     }
   }
 
-  //prevents default behaviour for drag and drop
-  useEffect(function () {
-    function fns(e) {
-      e = e || event;
-      e.preventDefault();
-    }
-
-    window.addEventListener("dragover", fns, false);
-
-    window.addEventListener("drop", fns, false);
-
-    return () => {
-      window.removeEventListener("dragover", fns);
-      window.removeEventListener("drop", fns);
-    };
-  }, []);
-
   return (
     <>
       <Navbar>
@@ -168,7 +134,7 @@ function SubmissionsPage() {
 
         <li className="active text-hoverBellsBlue">
           <CourseNavLink
-            path={`/submissions/${code}/${assName}`}
+            path={`/submissions/${code}/${assFileName}`}
             label={"Submissions"}
           />
         </li>
@@ -180,11 +146,7 @@ function SubmissionsPage() {
         <div className="flex items-center justify-between">
           <DownloadAssignment handleDownload={handleDownload} />
 
-          <Status
-            status={submitStatus}
-            studentsData={studentsData}
-            handleDownload={handleDownload}
-          />
+          <Status hasSubmitted={hasSubmitted} handleDownload={handleDownload} />
         </div>
 
         <form
@@ -192,7 +154,7 @@ function SubmissionsPage() {
           className="h-full space-y-6 overflow-y-auto rounded-sm  p-0.5"
         >
           <h2 className=" cursor-default rounded-t bg-bellsBlue p-2 text-base font-semibold capitalize text-white">
-            Submit {assName} for {code}
+            Submit {assignmentName} for {code}
           </h2>
 
           <InputGroup label={"Matric Number"}>
@@ -237,37 +199,12 @@ function SubmissionsPage() {
               onChange={storeSelectedFile}
             />
 
-            <div
-              onDragEnter={handleDragEnter}
-              onDragLeave={handleDrageLeave}
-              onDrop={handleDrop}
-              className={`relative hidden cursor-pointer rounded-sm transition-all duration-300 ease-in-out lg:flex ${file ? "" : "hover:bg-hoverYellow"} ${dragging ? "bg-hoverYellow " : " border border-dashed border-stone-400"} flex  flex-col items-center space-y-1 py-2 text-center text-black lg:py-4`}
-              onClick={triggerFile}
-            >
-              {file ? (
-                <IoMdCloseCircle
-                  className="absolute right-2.5 top-2.5 text-lg hover:text-hoverYellow"
-                  onClick={removeFile}
-                />
-              ) : null}
-
-              <FaFilePdf className="text-xl lg:text-3xl" />
-
-              <span className="text-sm ">
-                {file
-                  ? file.name.length > 25
-                    ? file.name.slice(0, 25).trim() + "..."
-                    : file.name
-                  : "Click or Drag & Drop File"}
-              </span>
-
-              <span className="text-xs font-semibold lowercase">pdf files</span>
-            </div>
+            <DragDrop setFile={setFile} fileRef={fileRef} file={file} />
           </InputGroup>
 
           <Button
-            disabled={submitting || submitStatus}
-            label={!submitStatus ? `Submit ${assName}` : "Submitted"}
+            disabled={submitting || hasSubmitted || !isOpen}
+            label={hasSubmitted ? "Submitted" : `Submit ${assignmentName}`}
             type="full"
           />
         </form>
@@ -276,36 +213,44 @@ function SubmissionsPage() {
   );
 }
 
-function Status({ status, studentsData, handleDownload }) {
-  const { assName } = useParams();
+function Status({ hasSubmitted, handleDownload }) {
+  const { assFileName } = useParams();
+  const { studentsData } = useLoaderData();
+
+  const assignmentName = assFileName.split("-")[0];
+  const dueDate = assFileName.split("-")[1];
+
+  const assignmentStatus = new Date(dueDate) > new Date() ? "Open" : "Closed";
+
   const [{ matric_no, college, dept }] = studentsData;
 
-  const filePath = `${assName}/${matric_no.replaceAll("/", "-")}-${college}-${dept}`;
+  const filePath = `${assignmentName}/${matric_no.replaceAll("/", "-")}-${college}-${dept}`;
 
   return (
     <p
-      onClick={status ? () => handleDownload(filePath, true) : null}
-      className={`flex cursor-default items-center gap-2 rounded-sm p-1 text-sm font-semibold text-white transition-colors duration-300 ease-in-out ${status ? "cursor-pointer bg-green-700  hover:text-hoverYellow " : "bg-red-700"}`}
+      onClick={hasSubmitted ? () => handleDownload(filePath, true) : null}
+      className={`flex cursor-default items-center gap-2 rounded-sm p-1 text-sm font-semibold text-white transition-colors duration-300 ease-in-out ${hasSubmitted ? "cursor-pointer bg-green-700  hover:text-hoverYellow " : "bg-red-700"}`}
     >
-      {status ? "Submitted " : "Pending"}{" "}
-      {status ? (
-        <MdCloudUpload className="text-lg" />
-      ) : (
-        <MdOutlinePendingActions className="text-lg" />
-      )}
+      {/*if the user has submitted and the assignment is opened show status Open: Submitted */}
+
+      {/*if the user has not submitted and the assignment is open, show Open: Pending else show Closed: Failed */}
+      {hasSubmitted
+        ? `${assignmentStatus}: Submitted `
+        : `${assignmentStatus}: ${assignmentStatus === "Open" ? "Pending" : "Failed"}`}
     </p>
   );
 }
 
 function DownloadAssignment({ handleDownload }) {
-  const { assName } = useParams();
+  const { assFileName } = useParams();
+  const assignmentName = assFileName.split("-")[0];
 
   return (
     <p
       className="flex cursor-pointer items-center gap-0.5 self-start text-sm font-semibold underline transition-colors duration-300 ease-in-out hover:text-hoverYellow"
-      onClick={() => handleDownload(assName)}
+      onClick={() => handleDownload(assFileName)}
     >
-      Download {assName} <FaFilePdf />
+      Download {assignmentName} <FaFilePdf />
     </p>
   );
 }
@@ -313,15 +258,16 @@ function DownloadAssignment({ handleDownload }) {
 export default SubmissionsPage;
 
 export async function SubmissionsLoader({ params }) {
-  const { code, assName } = params;
+  const { code, assFileName } = params;
 
+  const assignmentName = assFileName.split("-")[0];
   const studentsData = await GetStudentsData();
 
   const [{ college, matric_no, dept }] = studentsData;
 
   const fileName = `${matric_no.replaceAll("/", "-")}-${college}-${dept}`;
 
-  const filePath = `${code}/assignments/submissions/${assName}`;
+  const filePath = `${code}/assignments/submissions/${assignmentName}`;
 
   const hasSubmitted = await FileExists({
     fileName,
