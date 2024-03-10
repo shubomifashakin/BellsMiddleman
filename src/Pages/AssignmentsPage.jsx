@@ -4,6 +4,7 @@ import { FaEye } from "react-icons/fa";
 
 import { FormatTime } from "../Actions/HelperActions";
 import NoNotesOrAss from "../Components/NoNotesOrAss";
+import Table from "../Components/Table";
 
 function AssignmentsPage() {
   const { assignments } = useRouteLoaderData("courseData");
@@ -23,62 +24,49 @@ function AssignmentsPage() {
   return (
     <>
       {allAssignments.length ? (
-        <table
-          className={`w-full divide-y  divide-stone-400 overflow-hidden border border-stone-400 p-4 text-center `}
+        <Table
+          tableLabel={`All Assignments (${allAssignments.length})`}
+          headLabels={["S/N", "Title", "Uploaded", "Due Date"]}
         >
-          <thead className=" bg-bellsBlue text-white">
-            <tr className="divide-x divide-stone-400">
-              <th className="py-3.5 text-sm lg:text-base">S/N</th>
+          {allAssignments.map((assignment, index) => {
+            const assignmentName = assignment.name.split("-")[0];
 
-              <th className="py-3.5 text-sm lg:text-base">Title</th>
+            const dueDate = assignment.name.split("-")[1];
 
-              <th className="py-3.5 text-sm lg:text-base">Uploaded</th>
+            return (
+              <tr
+                className={`table-row ${index % 2 ? "bg-tableEven" : "bg-tableOdd"}`}
+                key={index}
+                onClick={() =>
+                  handleNavigate({
+                    courseCode: code,
+                    assName: assignment.name,
+                  })
+                }
+              >
+                <td className="py-3">{index + 1}</td>
 
-              <th className="py-3.5 text-sm lg:text-base">Due Date</th>
-            </tr>
-          </thead>
+                <td className="hidden py-3 lg:block">
+                  {assignmentName} &nbsp;
+                  <span className="text-xs">[click to view]</span>
+                </td>
 
-          <tbody className="divide-y divide-stone-400">
-            {allAssignments.map((assignment, index) => {
-              const assignmentName = assignment.name.split("-")[0];
+                <td className="flex items-center justify-center py-3 lg:hidden">
+                  {assignmentName} &nbsp;
+                  <span className="text-base">
+                    <FaEye />
+                  </span>
+                </td>
 
-              const dueDate = assignment.name.split("-")[1];
+                <td className="py-3 text-xs">
+                  {FormatTime(assignment.created_at)}
+                </td>
 
-              return (
-                <tr
-                  className={`cursor-pointer divide-x divide-stone-400   transition-all duration-300 ease-in-out hover:bg-bellsBlue hover:text-white ${index % 2 ? "bg-tableEven" : "bg-tableOdd"}`}
-                  key={index}
-                  onClick={() =>
-                    handleNavigate({
-                      courseCode: code,
-                      assName: assignment.name,
-                    })
-                  }
-                >
-                  <td className="py-3">{index + 1}</td>
-
-                  <td className="hidden py-3 lg:block">
-                    {assignmentName} &nbsp;
-                    <span className="text-xs">[click to view]</span>
-                  </td>
-
-                  <td className="flex items-center justify-center py-3 lg:hidden">
-                    {assignmentName} &nbsp;
-                    <span className="text-base">
-                      <FaEye />
-                    </span>
-                  </td>
-
-                  <td className="py-3 text-xs">
-                    {FormatTime(assignment.created_at)}
-                  </td>
-
-                  <td className="py-3 text-xs">{FormatTime(dueDate)}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+                <td className="py-3 text-xs">{FormatTime(dueDate)}</td>
+              </tr>
+            );
+          })}
+        </Table>
       ) : (
         <NoNotesOrAss label={"Assignments"} />
       )}
