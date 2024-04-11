@@ -41,6 +41,8 @@ function SubmissionsPage() {
 
   //extract the due date from the params & check if student can still submit
   const dueDate = assFileName.split("-")[1];
+
+  //if true, the users can still submit
   const isOpen = new Date(dueDate) > new Date();
 
   const navigate = useNavigate();
@@ -158,44 +160,24 @@ function SubmissionsPage() {
           </h2>
 
           <InputGroup label={"Matric Number"}>
-            <input
-              className=" rounded-sm px-2 py-2.5
-             outline outline-1 outline-stone-400  disabled:bg-transparent"
-              type="text"
-              id="matricNo"
-              placeholder="Your Matric Number"
-              value={matric_no}
-              disabled
-            />
+            <Input inputVal={matric_no} id={"matricNo"} />
           </InputGroup>
 
           <InputGroup label={"College"}>
-            <input
-              className=" rounded-sm px-2 py-2.5 outline outline-1 outline-stone-400  disabled:bg-transparent"
-              type="text"
-              id="College"
-              value={college}
-              disabled
-            />
+            <Input inputVal={college} id={"College"} />
           </InputGroup>
 
           <InputGroup label={"Department"}>
-            <input
-              className=" rounded-sm px-2 py-2.5
-               outline outline-1 outline-stone-400  disabled:bg-transparent"
-              type="text"
-              id="Department"
-              value={dept}
-              disabled
-            />
+            <Input inputVal={dept} id={"Department"} />
           </InputGroup>
 
           <InputGroup label={"Assignment"}>
             <input
               type="file"
               className="lg:hidden"
-              accept=".pdf"
+              accept=".pdf,.ppt,.pptx"
               ref={fileRef}
+              disabled={hasSubmitted || !isOpen || submitting}
               onChange={storeSelectedFile}
             />
 
@@ -220,7 +202,9 @@ function Status({ hasSubmitted, handleDownload }) {
   const assignmentName = assFileName.split("-")[0];
   const dueDate = assFileName.split("-")[1];
 
-  const assignmentStatus = new Date(dueDate) > new Date() ? "Open" : "Closed";
+  //if true, the users can still submit
+  //if not, users cannot
+  const canSubmit = new Date(dueDate) > new Date();
 
   const [{ matric_no, college, dept }] = studentsData;
 
@@ -229,14 +213,14 @@ function Status({ hasSubmitted, handleDownload }) {
   return (
     <p
       onClick={hasSubmitted ? () => handleDownload(filePath, true) : null}
-      className={`flex cursor-default items-center gap-2 rounded-sm p-1 text-sm font-semibold text-white transition-colors duration-300 ease-in-out ${hasSubmitted ? "cursor-pointer bg-green-700  hover:text-hoverYellow " : "bg-red-700"}`}
+      className={`flex cursor-default items-center gap-2 rounded-sm p-1 text-sm font-semibold text-white transition-colors duration-300 ease-in-out ${hasSubmitted ? "cursor-pointer bg-green-700  hover:text-hoverYellow " : canSubmit ? "bg-yellow-700" : "bg-red-700"}`}
     >
-      {/*if the user has submitted and the assignment is opened show status Open: Submitted */}
+      {/*if the user has submitted, show  Submitted */}
 
-      {/*if the user has not submitted and the assignment is open, show Open: Pending else show Closed: Failed */}
-      {hasSubmitted
-        ? `${assignmentStatus}: Submitted `
-        : `${assignmentStatus}: ${assignmentStatus === "Open" ? "Pending" : "Failed"}`}
+      {/*if the user has not submitted and the assignment is open, show Pending */}
+
+      {/*if the submission date has passed, show Failed */}
+      {hasSubmitted ? `Submitted` : `${canSubmit ? "Pending" : "Failed"}`}
     </p>
   );
 }
@@ -252,6 +236,18 @@ function DownloadAssignment({ handleDownload }) {
     >
       Download {assignmentName} <FaFilePdf />
     </p>
+  );
+}
+
+function Input({ inputVal, id }) {
+  return (
+    <input
+      className="rounded-sm px-2 py-2.5 outline outline-1 outline-stone-400  disabled:bg-transparent"
+      type="text"
+      id={id}
+      value={inputVal}
+      disabled
+    />
   );
 }
 
