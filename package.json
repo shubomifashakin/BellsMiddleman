@@ -11,10 +11,12 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@emotion/react": "^11.11.4",
+    "@emotion/styled": "^11.11.5",
+    "@mui/material": "^5.15.15",
     "@supabase/supabase-js": "^2.39.7",
     "lottie-react": "^2.4.0",
     "react": "^18.2.0",
-    "react-data-table-component": "^7.6.2",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.50.1",
     "react-hot-toast": "^2.4.1",
