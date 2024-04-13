@@ -1,29 +1,53 @@
+import { useEffect, useReducer, useRef, useState } from "react";
 import { useLoaderData, useNavigate } from "react-router";
 
 import { FaEye } from "react-icons/fa";
 
-import { FindCourse, GetStudentsData } from "../Actions/SupabaseActions";
-
-import { Navbar } from "../Components/Navbar";
+import toast from "react-hot-toast";
 
 import { SortArrayBasedOnLetters } from "../Actions/HelperActions";
 import { IoIosAdd, IoIosAddCircle, IoIosCloseCircle } from "react-icons/io";
-import { Box, Modal, TextField, Typography } from "@mui/material";
-import { useEffect, useReducer, useRef, useState } from "react";
+import { Modal, TextField, Typography } from "@mui/material";
+
+import { Navbar } from "../Components/Navbar";
 import { Button } from "../Components/Button";
 
+import {
+  FindCourse,
+  GetStudentsData,
+  UpdateCourses,
+} from "../Actions/SupabaseActions";
+
 function HomePage() {
+  const [courses2, setCourses2] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
 
   const { courses, matric_no, college, dept } = useLoaderData();
 
   const navigate = useNavigate();
 
-  const courses2 = SortArrayBasedOnLetters(JSON.parse(courses));
-
   function handleToggleModal() {
     setModalOpen((c) => !c);
   }
+
+  useEffect(
+    function () {
+      async function isJSON() {
+        try {
+          //If the student has never updated courses, its still a json
+          const coursesJson = JSON.parse(courses);
+
+          setCourses2(SortArrayBasedOnLetters(coursesJson));
+        } catch (e) {
+          //if the student has updated before, then it is a regular array
+          setCourses2(SortArrayBasedOnLetters(courses));
+        }
+      }
+
+      isJSON();
+    },
+    [courses],
+  );
 
   return (
     <>
@@ -96,33 +120,23 @@ function HomePage() {
     </>
   );
 }
-const style = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: 600,
-  bgcolor: "#F7F4EA",
-  border: "1px solid #000",
-  boxShadow: 24,
-  borderRadius: "5px",
-  p: 4,
-  fontFamily: "Poppins, sans-serif",
-};
 
 function ModalComp({ handleToggleModal, selectedCourses }) {
   const [updatedCourses, setUpdatedCourses] = useState(selectedCourses);
 
-  const [{ foundCourses, loading, error, searchParam }, dispatch] = useReducer(
+  const [{ foundCourses, loading, searchParam }, dispatch] = useReducer(
     Step3Reducer,
     initialStep3State,
   );
 
   const searchRef = useRef(null);
 
+  const navigate = useNavigate();
+
   function addCourse(e, course) {
     e.stopPropagation();
     e.preventDefault();
+
     if (selectedCourses.includes(course)) return;
 
     setUpdatedCourses((c) => [...c, course]);
@@ -136,6 +150,31 @@ function ModalComp({ handleToggleModal, selectedCourses }) {
     e.preventDefault();
 
     setUpdatedCourses((c) => c.filter((c2) => c2 !== course));
+  }
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    try {
+      //if the updated courses and previous courses are the same length and they are the same selected courses
+      if (
+        updatedCourses.length === selectedCourses.length &&
+        updatedCourses.every((c, i) => {
+          return c === selectedCourses[i];
+        })
+      )
+        return;
+
+      await UpdateCourses(updatedCourses);
+      toast.success("Successfully Updated Courses");
+
+      //refresh the page
+      navigate(`/home`);
+
+      //close the modal
+      handleToggleModal();
+    } catch (err) {
+      toast.error(err.message);
+    }
   }
 
   useEffect(
@@ -169,7 +208,7 @@ function ModalComp({ handleToggleModal, selectedCourses }) {
   return (
     <Modal open={true} onClose={handleToggleModal}>
       <div className="absolute left-1/2 top-1/2 w-3/4 -translate-x-1/2 -translate-y-1/2 rounded-sm border border-stone-500 bg-primaryBgColor px-4 py-6 ">
-        <form className="space-y-3">
+        <form className="space-y-3" onSubmit={handleSubmit}>
           <Typography
             sx={{
               fontSize: "1.05rem",

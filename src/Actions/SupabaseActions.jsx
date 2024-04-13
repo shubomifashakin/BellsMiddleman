@@ -8,12 +8,13 @@ export async function SignUpUser(details) {
     password,
     options: {
       data: {
-        courses: JSON.stringify(courses),
+        courses,
         college,
         matricNo,
         dept,
         role: "student",
       },
+      emailRedirectTo: "https://student-bellscommsportal.netlify.app/",
     },
   });
 
@@ -94,6 +95,21 @@ export async function LogOutFn() {
   let { error } = await supabase.auth.signOut();
 
   if (error?.message) throw error;
+}
+
+export async function UpdateCourses(courses) {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const { error } = await supabase
+    .from("Students")
+    .update({ courses })
+    .eq("user_id", user.id);
+
+  if (error?.message) {
+    throw error;
+  }
 }
 
 export async function UploadAssignment(details) {
