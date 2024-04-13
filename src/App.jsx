@@ -24,11 +24,7 @@ const router = createBrowserRouter([
   { path: "forgotPassword", element: <ForgotPassswordPage /> },
   {
     path: "updatePassword",
-    element: (
-      <ProtectedRoute>
-        <UpdatePasswordPage />
-      </ProtectedRoute>
-    ),
+    element: <UpdatePasswordPage />,
   },
 
   {

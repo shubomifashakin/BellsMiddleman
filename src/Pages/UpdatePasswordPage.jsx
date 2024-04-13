@@ -45,6 +45,7 @@ function UpdatePasswordPage() {
       navigate("/home");
     } catch (err) {
       toast.error(err.message);
+      navigate("/");
     }
   }
 
